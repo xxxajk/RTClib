@@ -2,6 +2,7 @@
 // Released to the public domain! Enjoy!
 
 // Simple general-purpose date/time class (no TZ / DST / leap second handling!)
+
 class DateTime {
 public:
     DateTime (uint32_t t =0);
@@ -32,6 +33,7 @@ class RTC_DS1307 {
 public:
   static uint8_t begin(void);
     static void adjust(const DateTime& dt);
+    static void set(int shour, int smin, int ssec, int sday, int smonth, int syear);
     uint8_t isrunning(void);
     static DateTime now();
     static uint8_t readMemory(uint8_t offset, uint8_t* data, uint8_t length);
