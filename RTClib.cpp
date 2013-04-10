@@ -1,8 +1,6 @@
 // Code by JeeLabs http://news.jeelabs.org/code/
 // Released to the public domain! Enjoy!
 
-#include <Wire.h>
-#include <avr/pgmspace.h>
 #include "RTClib.h"
 
 #define DS1307_ADDRESS 0x68
@@ -10,11 +8,6 @@
 
 #define SECONDS_FROM_1970_TO_2000 946684800
 
-#if (ARDUINO >= 100)
-#include <Arduino.h> // capital A so it is error prone on case-sensitive filesystems
-#else
-#include <WProgram.h>
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 // utility code, some of this could be exposed in the DateTime API if needed
@@ -154,59 +147,57 @@ uint8_t RTC_DS1307::begin(void) {
 }
 
 
-#if (ARDUINO >= 100)
-
 uint8_t RTC_DS1307::isrunning(void) {
         Wire.beginTransmission(DS1307_ADDRESS);
-        Wire.write((uint8_t)0);
+        WIREWRITE((uint8_t)0);
         Wire.endTransmission();
 
         Wire.requestFrom(DS1307_ADDRESS, 1);
-        uint8_t ss = Wire.read();
+        uint8_t ss = WIREREAD();
         return !(ss >> 7);
 }
 
 void RTC_DS1307::adjust(const DateTime& dt) {
         Wire.beginTransmission(DS1307_ADDRESS);
-        Wire.write((uint8_t)0);
-        Wire.write(bin2bcd(dt.second()));
-        Wire.write(bin2bcd(dt.minute()));
-        Wire.write(bin2bcd(dt.hour()));
-        Wire.write(bin2bcd(0));
-        Wire.write(bin2bcd(dt.day()));
-        Wire.write(bin2bcd(dt.month()));
-        Wire.write(bin2bcd(dt.year() - 2000));
-        Wire.write((uint8_t)0);
+        WIREWRITE((uint8_t)0);
+        WIREWRITE(bin2bcd(dt.second()));
+        WIREWRITE(bin2bcd(dt.minute()));
+        WIREWRITE(bin2bcd(dt.hour()));
+        WIREWRITE(bin2bcd(0));
+        WIREWRITE(bin2bcd(dt.day()));
+        WIREWRITE(bin2bcd(dt.month()));
+        WIREWRITE(bin2bcd(dt.year() - 2000));
+        WIREWRITE((uint8_t)0);
         Wire.endTransmission();
 }
 
 void RTC_DS1307::set(int shour, int smin, int ssec, int sday, int smonth, int syear) {
         Wire.beginTransmission(DS1307_ADDRESS);
-        Wire.write(i);
-        Wire.write(decToBcd(ssec));
-        Wire.write(decToBcd(smin));
-        Wire.write(decToBcd(shour));
-        Wire.write(decToBcd(0));
-        Wire.write(decToBcd(sday));
-        Wire.write(decToBcd(smonth));
-        Wire.write(decToBcd(syear - 2000));
-        Wire.write(i);
+        WIREWRITE(i);
+        WIREWRITE(decToBcd(ssec));
+        WIREWRITE(decToBcd(smin));
+        WIREWRITE(decToBcd(shour));
+        WIREWRITE(decToBcd(0));
+        WIREWRITE(decToBcd(sday));
+        WIREWRITE(decToBcd(smonth));
+        WIREWRITE(decToBcd(syear - 2000));
+        WIREWRITE(i);
         Wire.endTransmission();
 }
 
 DateTime RTC_DS1307::now() {
         Wire.beginTransmission(DS1307_ADDRESS);
-        Wire.write((uint8_t)0);
+        WIREWRITE((uint8_t)0);
         Wire.endTransmission();
 
         Wire.requestFrom(DS1307_ADDRESS, 7);
-        uint8_t ss = bcd2bin(Wire.read() & 0x7F);
-        uint8_t mm = bcd2bin(Wire.read());
-        uint8_t hh = bcd2bin(Wire.read());
-        Wire.read();
-        uint8_t d = bcd2bin(Wire.read());
-        uint8_t m = bcd2bin(Wire.read());
-        uint16_t y = bcd2bin(Wire.read()) + 2000;
+        uint8_t ss = bcd2bin(WIREREAD() & 0x7F);
+        uint8_t mm = bcd2bin(WIREREAD());
+        uint8_t hh = bcd2bin(WIREREAD());
+        WIREREAD();
+        uint8_t d = bcd2bin(WIREREAD());
+        uint8_t m = bcd2bin(WIREREAD());
+        uint16_t y = bcd2bin(WIREREAD()) + 2000;
 
         return DateTime(y, m, d, hh, mm, ss);
 }
@@ -215,12 +206,12 @@ uint8_t RTC_DS1307::readMemory(uint8_t offset, uint8_t* data, uint8_t length) {
         uint8_t bytes_read = 0;
 
         Wire.beginTransmission(DS1307_ADDRESS);
-        Wire.write(0x08 + offset);
+        WIREWRITE(0x08 + offset);
         Wire.endTransmission();
 
         Wire.requestFrom((uint8_t)DS1307_ADDRESS, (uint8_t)length);
         while (Wire.available() > 0 && bytes_read < length) {
-                data[bytes_read] = Wire.read();
+                data[bytes_read] = WIREREAD();
                 bytes_read++;
         }
 
@@ -231,8 +222,8 @@ uint8_t RTC_DS1307::writeMemory(uint8_t offset, uint8_t* data, uint8_t length) {
         uint8_t bytes_written;
 
         Wire.beginTransmission(DS1307_ADDRESS);
-        Wire.write(0x08 + offset);
-        bytes_written = Wire.write(data, length);
+        WIREWRITE(0x08 + offset);
+        bytes_written = WIREWRITE(data, length);
         Wire.endTransmission();
 
         return bytes_written;
@@ -242,11 +233,11 @@ Ds1307SqwPinMode RTC_DS1307::readSqwPinMode() {
         int mode;
 
         Wire.beginTransmission(DS1307_ADDRESS);
-        Wire.write(0x07);
+        WIREWRITE(0x07);
         Wire.endTransmission();
 
         Wire.requestFrom((uint8_t)DS1307_ADDRESS, (uint8_t)1);
-        mode = Wire.read();
+        mode = WIREREAD();
 
         mode &= 0x93;
         return static_cast<Ds1307SqwPinMode>(mode);
@@ -254,117 +245,10 @@ Ds1307SqwPinMode RTC_DS1307::readSqwPinMode() {
 
 void RTC_DS1307::writeSqwPinMode(Ds1307SqwPinMode mode) {
         Wire.beginTransmission(DS1307_ADDRESS);
-        Wire.write(0x07);
-        Wire.write(mode);
+        WIREWRITE(0x07);
+        WIREWRITE(mode);
         Wire.endTransmission();
 }
-
-#else
-
-uint8_t RTC_DS1307::isrunning(void) {
-        Wire.beginTransmission(DS1307_ADDRESS);
-        Wire.send((uint8_t)0);
-        Wire.endTransmission();
-
-        Wire.requestFrom(DS1307_ADDRESS, 1);
-        uint8_t ss = Wire.receive();
-        return !(ss >> 7);
-}
-
-void RTC_DS1307::adjust(const DateTime& dt) {
-        Wire.beginTransmission(DS1307_ADDRESS);
-        Wire.send((uint8_t)0);
-        Wire.send(bin2bcd(dt.second()));
-        Wire.send(bin2bcd(dt.minute()));
-        Wire.send(bin2bcd(dt.hour()));
-        Wire.send(bin2bcd(0));
-        Wire.send(bin2bcd(dt.day()));
-        Wire.send(bin2bcd(dt.month()));
-        Wire.send(bin2bcd(dt.year() - 2000));
-        Wire.send((uint8_t)0);
-        Wire.endTransmission();
-}
-
-void RTC_DS1307::set(int shour, int smin, int ssec, int sday, int smonth, int syear) {
-        Wire.beginTransmission(DS1307_ADDRESS);
-        Wire.send(i);
-        Wire.send(decToBcd(ssec));
-        Wire.send(decToBcd(smin));
-        Wire.send(decToBcd(shour));
-        Wire.send(decToBcd(0));
-        Wire.send(decToBcd(sday));
-        Wire.send(decToBcd(smonth));
-        Wire.send(decToBcd(syear - 2000));
-        Wire.send(i);
-        Wire.endTransmission();
-}
-
-DateTime RTC_DS1307::now() {
-        Wire.beginTransmission(DS1307_ADDRESS);
-        Wire.send((uint8_t)0);
-        Wire.endTransmission();
-
-        Wire.requestFrom(DS1307_ADDRESS, 7);
-        uint8_t ss = bcd2bin(Wire.receive() & 0x7F);
-        uint8_t mm = bcd2bin(Wire.receive());
-        uint8_t hh = bcd2bin(Wire.receive());
-        Wire.receive();
-        uint8_t d = bcd2bin(Wire.receive());
-        uint8_t m = bcd2bin(Wire.receive());
-        uint16_t y = bcd2bin(Wire.receive()) + 2000;
-
-        return DateTime(y, m, d, hh, mm, ss);
-}
-
-uint8_t RTC_DS1307::readMemory(uint8_t offset, uint8_t* data, uint8_t length) {
-        uint8_t bytes_read = 0;
-
-        Wire.beginTransmission(DS1307_ADDRESS);
-        Wire.send(0x08 + offset);
-        Wire.endTransmission();
-
-        Wire.requestFrom((uint8_t)DS1307_ADDRESS, (uint8_t)length);
-        while (Wire.available() > 0 && bytes_read < length) {
-                data[bytes_read] = Wire.receive();
-                bytes_read++;
-        }
-
-        return bytes_read;
-}
-
-uint8_t RTC_DS1307::writeMemory(uint8_t offset, uint8_t* data, uint8_t length) {
-
-        Wire.beginTransmission(DS1307_ADDRESS);
-        Wire.send(0x08 + offset);
-        Wire.send(data, length);
-        Wire.endTransmission();
-
-        return length;
-}
-
-Ds1307SqwPinMode RTC_DS1307::readSqwPinMode() {
-        int mode;
-
-        Wire.beginTransmission(DS1307_ADDRESS);
-        Wire.send(0x07);
-        Wire.endTransmission();
-
-        Wire.requestFrom((uint8_t)DS1307_ADDRESS, (uint8_t)1);
-        mode = Wire.receive();
-
-        mode &= 0x93;
-
-        return static_cast<Ds1307SqwPinMode>(mode);
-}
-
-void RTC_DS1307::writeSqwPinMode(Ds1307SqwPinMode mode) {
-        Wire.beginTransmission(DS1307_ADDRESS);
-        Wire.send(0x07);
-        Wire.send(mode);
-        Wire.endTransmission();
-}
-
-#endif
 
 
 ////////////////////////////////////////////////////////////////////////////////

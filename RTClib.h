@@ -5,6 +5,17 @@
 
 #ifndef RTCLIB_H
 #define RTCLIB_H
+#include <Wire.h>
+#include <avr/pgmspace.h>
+#if (ARDUINO >= 100)
+#include <Arduino.h> // capital A so it is error prone on case-sensitive filesystems
+#define WIREWRITE Wire.write
+#define WIREREAD Wire.read
+#else
+#include <WProgram.h>
+#define WIREWRITE Wire.send
+#define WIREREAD Wire.receive
+#endif
 
 class DateTime {
 public:
