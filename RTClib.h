@@ -17,7 +17,6 @@
 #define WIREREAD Wire.receive
 #endif
 
-
 class DateTime {
 public:
         DateTime(uint32_t t = 0);
@@ -82,11 +81,12 @@ public:
 
 // RTC using the internal millis() clock, has to be initialized before use
 // NOTE: this clock won't be correct once the millis() timer rolls over (>49d?)
+
 class RTC_Millis {
 public:
 
         static uint8_t begin(const DateTime& dt) {
-                return (adjust(dt));
+                return(adjust(dt));
         }
         static uint8_t adjust(const DateTime& dt);
         static DateTime now();
