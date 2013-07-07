@@ -17,6 +17,7 @@
 #define WIREREAD Wire.receive
 #endif
 
+
 class DateTime {
 public:
         DateTime(uint32_t t = 0);
@@ -53,6 +54,8 @@ public:
         long secondstime() const;
         // 32-bit times as seconds since 1/1/1970
         uint32_t unixtime(void) const;
+        // time packed
+        uint32_t FatPacked(void) const;
 
 protected:
         uint8_t yOff, m, d, hh, mm, ss;
@@ -66,9 +69,9 @@ enum Ds1307SqwPinMode {
 
 class RTC_DS1307 {
 public:
-        static uint8_t begin(void);
-        static void adjust(const DateTime& dt);
-        static void set(int shour, int smin, int ssec, int sday, int smonth, int syear);
+        static uint8_t begin(const DateTime& dt);
+        static uint8_t adjust(const DateTime& dt);
+        static uint8_t set(int shour, int smin, int ssec, int sday, int smonth, int syear);
         uint8_t isrunning(void);
         static DateTime now();
         static uint8_t readMemory(uint8_t offset, uint8_t* data, uint8_t length);
@@ -79,15 +82,15 @@ public:
 
 // RTC using the internal millis() clock, has to be initialized before use
 // NOTE: this clock won't be correct once the millis() timer rolls over (>49d?)
-
 class RTC_Millis {
 public:
 
-        static void begin(const DateTime& dt) {
-                adjust(dt);
+        static uint8_t begin(const DateTime& dt) {
+                return (adjust(dt));
         }
-        static void adjust(const DateTime& dt);
+        static uint8_t adjust(const DateTime& dt);
         static DateTime now();
+        uint8_t isrunning(void);
 
 protected:
         static long offset;

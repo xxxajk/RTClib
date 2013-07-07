@@ -1,7 +1,7 @@
 // Code by JeeLabs http://news.jeelabs.org/code/
 // Released to the public domain! Enjoy!
 
-#include "RTClib.h"
+#include <RTClib.h>
 
 #define DS1307_ADDRESS 0x68
 #define SECONDS_PER_DAY 86400L
@@ -118,6 +118,27 @@ uint8_t DateTime::dayOfWeek() const {
         return (day + 6) % 7; // Jan 1, 2000 is a Saturday, i.e. returns 6
 }
 
+/**
+ * 
+ * @return Time pre-packed for fat file system
+ */
+
+uint32_t DateTime::FatPacked(void) const {
+        uint32_t t;
+        /*
+         * Time pre-packed for fat file system
+         *
+         *       bit31:25 year 33
+         *       bit24:21 month 1
+         *       bit20:16 day 1
+         *       bit15:11 h 0
+         *       bit10:5 m 0
+         *       bit4:0 s 0
+         */
+        t=ss + ((uint32_t)mm << 5) + ((uint32_t)hh << 11) + ((uint32_t)d << 16) + ((uint32_t)m << 21)  + ((uint32_t)((2000 + yOff) - 1980) << 25);
+        return t;
+}
+
 uint32_t DateTime::unixtime(void) const {
         uint32_t t;
         uint16_t days = date2days(yOff, m, d);
@@ -142,7 +163,11 @@ static uint8_t decToBcd(uint8_t val) {
         return ( (val / 10 * 16) + (val % 10));
 }
 
-uint8_t RTC_DS1307::begin(void) {
+
+// Warning Logic is reversed!
+uint8_t RTC_DS1307::begin(const DateTime& dt) {
+        Wire.beginTransmission(DS1307_ADDRESS);
+        if(Wire.endTransmission()) return 0;
         return 1;
 }
 
@@ -150,14 +175,13 @@ uint8_t RTC_DS1307::begin(void) {
 uint8_t RTC_DS1307::isrunning(void) {
         Wire.beginTransmission(DS1307_ADDRESS);
         WIREWRITE((uint8_t)0);
-        Wire.endTransmission();
-
+        if(Wire.endTransmission()) return 0;
         Wire.requestFrom(DS1307_ADDRESS, 1);
         uint8_t ss = WIREREAD();
         return !(ss >> 7);
 }
 
-void RTC_DS1307::adjust(const DateTime& dt) {
+uint8_t RTC_DS1307::adjust(const DateTime& dt) {
         Wire.beginTransmission(DS1307_ADDRESS);
         WIREWRITE((uint8_t)0);
         WIREWRITE(bin2bcd(dt.second()));
@@ -168,12 +192,12 @@ void RTC_DS1307::adjust(const DateTime& dt) {
         WIREWRITE(bin2bcd(dt.month()));
         WIREWRITE(bin2bcd(dt.year() - 2000));
         WIREWRITE((uint8_t)0);
-        Wire.endTransmission();
+        return(!Wire.endTransmission());
 }
 
-void RTC_DS1307::set(int shour, int smin, int ssec, int sday, int smonth, int syear) {
+uint8_t RTC_DS1307::set(int shour, int smin, int ssec, int sday, int smonth, int syear) {
         Wire.beginTransmission(DS1307_ADDRESS);
-        WIREWRITE(i);
+        WIREWRITE((uint8_t)0);
         WIREWRITE(decToBcd(ssec));
         WIREWRITE(decToBcd(smin));
         WIREWRITE(decToBcd(shour));
@@ -181,10 +205,11 @@ void RTC_DS1307::set(int shour, int smin, int ssec, int sday, int smonth, int sy
         WIREWRITE(decToBcd(sday));
         WIREWRITE(decToBcd(smonth));
         WIREWRITE(decToBcd(syear - 2000));
-        WIREWRITE(i);
-        Wire.endTransmission();
+        WIREWRITE((uint8_t)0);
+        return(!Wire.endTransmission());
 }
 
+// This is bad, can't report error.
 DateTime RTC_DS1307::now() {
         Wire.beginTransmission(DS1307_ADDRESS);
         WIREWRITE((uint8_t)0);
@@ -207,14 +232,14 @@ uint8_t RTC_DS1307::readMemory(uint8_t offset, uint8_t* data, uint8_t length) {
 
         Wire.beginTransmission(DS1307_ADDRESS);
         WIREWRITE(0x08 + offset);
-        Wire.endTransmission();
+        if(!Wire.endTransmission()) {
 
         Wire.requestFrom((uint8_t)DS1307_ADDRESS, (uint8_t)length);
         while (Wire.available() > 0 && bytes_read < length) {
                 data[bytes_read] = WIREREAD();
                 bytes_read++;
         }
-
+        }
         return bytes_read;
 }
 
@@ -224,7 +249,7 @@ uint8_t RTC_DS1307::writeMemory(uint8_t offset, uint8_t* data, uint8_t length) {
         Wire.beginTransmission(DS1307_ADDRESS);
         WIREWRITE(0x08 + offset);
         bytes_written = WIREWRITE(data, length);
-        Wire.endTransmission();
+        if(Wire.endTransmission()) bytes_written = -1;
 
         return bytes_written;
 }
@@ -256,12 +281,17 @@ void RTC_DS1307::writeSqwPinMode(Ds1307SqwPinMode mode) {
 
 long RTC_Millis::offset = 0;
 
-void RTC_Millis::adjust(const DateTime& dt) {
+uint8_t RTC_Millis::adjust(const DateTime& dt) {
         offset = dt.unixtime() - millis() / 1000;
+        return 1;
 }
 
 DateTime RTC_Millis::now() {
         return (uint32_t)(offset + millis() / 1000);
+}
+
+uint8_t RTC_Millis::isrunning(void) {
+        return offset ? 0 : 1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
