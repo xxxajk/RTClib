@@ -74,6 +74,26 @@ DateTime::DateTime(uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint
         ss = sec;
 }
 
+DateTime::DateTime(uint16_t fdate, uint16_t ftime) {
+        /*
+         * Time pre-packed for fat file system
+         *
+         *       bit31:25 year
+         *       bit24:21 month
+         *       bit20:16 day
+         *       bit15:11 h
+         *       bit10:5 m
+         *       bit4:0 s (2 second resolution)
+         */
+
+        ss = (ftime & 31) << 1;
+        mm = (ftime >> 5) & 63;
+        hh = (ftime >> 11) & 31;
+        d = fdate & 31;
+        m = (fdate >> 5) & 15;
+        yOff = (((fdate >> 9) & 127) + 1980) - 2000;
+}
+
 static uint8_t conv2d(const char* p) {
         uint8_t v = 0;
         if ('0' <= *p && *p <= '9')
@@ -128,14 +148,14 @@ uint32_t DateTime::FatPacked(void) const {
         /*
          * Time pre-packed for fat file system
          *
-         *       bit31:25 year 33
-         *       bit24:21 month 1
-         *       bit20:16 day 1
-         *       bit15:11 h 0
-         *       bit10:5 m 0
-         *       bit4:0 s 0
+         *       bit31:25 year
+         *       bit24:21 month
+         *       bit20:16 day
+         *       bit15:11 h
+         *       bit10:5 m
+         *       bit4:0 s (2 second resolution)
          */
-        t = ss + ((uint32_t)mm << 5) + ((uint32_t)hh << 11) + ((uint32_t)d << 16) + ((uint32_t)m << 21) + ((uint32_t)((2000 + yOff) - 1980) << 25);
+        t = (ss >> 1) + ((uint32_t)mm << 5) + ((uint32_t)hh << 11) + ((uint32_t)d << 16) + ((uint32_t)m << 21) + ((uint32_t)((2000 + yOff) - 1980) << 25);
         return t;
 }
 

@@ -23,6 +23,7 @@ public:
         DateTime(uint16_t year, uint8_t month, uint8_t day,
                 uint8_t hour = 0, uint8_t min = 0, uint8_t sec = 0);
         DateTime(const char* date, const char* time);
+        DateTime(uint16_t fdate, uint16_t ftime);
 
         uint16_t year() const {
                 return 2000 + yOff;
