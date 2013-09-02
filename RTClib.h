@@ -64,7 +64,7 @@ protected:
 // RTC based on the DS1307 chip connected via I2C and the Wire library
 
 enum Ds1307SqwPinMode {
-        OFF = 0x00, ON = 0x80, SquareWave1HZ = 0x10, SquareWave4kHz = 0x11, SquareWave8kHz = 0x12, SquareWave32kHz = 0x13
+        Ds1307SquareWaveOFF = 0x00, Ds1307SquareWaveON = 0x80, Ds1307SquareWave1HZ = 0x10, Ds1307SquareWave4kHz = 0x11, Ds1307SquareWave8kHz = 0x12, Ds1307SquareWave32kHz = 0x13
 };
 
 class RTC_DS1307 {
