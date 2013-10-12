@@ -7,58 +7,67 @@
 #define RTCLIB_H
 #include <Wire.h>
 #include <avr/pgmspace.h>
-#if (ARDUINO >= 100)
 #include <Arduino.h> // capital A so it is error prone on case-sensitive filesystems
+#include "time.h"
 #define WIREWRITE Wire.write
 #define WIREREAD Wire.read
-#else
-#include <WProgram.h>
-#define WIREWRITE Wire.send
-#define WIREREAD Wire.receive
+
+/* Set this to a one to use the xmem2 lock. This is needed for multitasking and threading */
+#ifndef USE_XMEM_I2C_LOCK
+#define USE_XMEM_I2C_LOCK 0
 #endif
+
+#if USE_XMEM_I2C_LOCK
+#include <xmem.h>
+#else
+#define XMEM_ACQUIRE_I2C() (void(0))
+#define XMEM_RELEASE_I2C() (void(0))
+#endif
+
 
 class DateTime {
 public:
-        DateTime(uint32_t t = 0);
+        DateTime(time_t t = 0);
+        DateTime(int32_t t);
         DateTime(uint16_t year, uint8_t month, uint8_t day,
                 uint8_t hour = 0, uint8_t min = 0, uint8_t sec = 0);
         DateTime(const char* date, const char* time);
         DateTime(uint16_t fdate, uint16_t ftime);
 
-        uint16_t year() const {
-                return 2000 + yOff;
+        uint16_t year(void) const {
+                return _time.tm_year + 1900;
         }
 
-        uint8_t month() const {
-                return m;
+        uint8_t month(void) const {
+                return _time.tm_mon;
         }
 
-        uint8_t day() const {
-                return d;
+        uint8_t day(void) const {
+                return _time.tm_mday;
         }
 
-        uint8_t hour() const {
-                return hh;
+        uint8_t hour(void) const {
+                return _time.tm_hour;
         }
 
-        uint8_t minute() const {
-                return mm;
+        uint8_t minute(void) const {
+                return _time.tm_min;
         }
 
-        uint8_t second() const {
-                return ss;
+        uint8_t second(void) const {
+                return _time.tm_sec;
         }
-        uint8_t dayOfWeek() const;
 
-        // 32-bit times as seconds since 1/1/2000
-        long secondstime() const;
-        // 32-bit times as seconds since 1/1/1970
-        uint32_t unixtime(void) const;
-        // time packed
-        uint32_t FatPacked(void) const;
+        uint8_t dayOfWeek(void) const {
+                return _time.tm_wday;
+        }
+
+        time_t secondstime(void) const;
+        time_t unixtime(void) const;
+        time_t FatPacked(void) const;
 
 protected:
-        uint8_t yOff, m, d, hh, mm, ss;
+        struct tm _time;
 };
 
 // RTC based on the DS1307 chip connected via I2C and the Wire library
@@ -94,6 +103,11 @@ public:
         uint8_t isrunning(void);
 
 protected:
-        static long offset;
+        static int64_t offset;
 };
+extern RTC_DS1307 RTC_DS1307_RTC;
+extern void RTCset(const DateTime& dt);
+extern DateTime RTCnow();
+boolean RTChardware(void);
+
 #endif // RTCLIB_H

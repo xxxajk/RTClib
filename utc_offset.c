@@ -32,4 +32,4 @@
 	UTC offset in seconds East
 */
 
-long            __utc_offset;
+long            __utc_offset=0L;
