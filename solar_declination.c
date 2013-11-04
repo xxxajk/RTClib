@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -75,3 +76,4 @@ solar_declination(const time_t * timer)
 
     return -dT;
 }
+#endif

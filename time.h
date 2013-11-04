@@ -103,34 +103,20 @@
 extern "C" {
 #endif
 
+
 #include <inttypes.h>
 #include <stdlib.h>
+#ifdef __cplusplus
+}
+#endif
 
-        /** \ingroup avr_time */
-        /* @{ */
 
-        /**
-            time_t represents seconds elapsed from Midnight, Jan 1 2000 UTC (the Y2K 'epoch').
-            Its range allows this implementation to represent time up to Tue Feb 7 06:28:15 2136 UTC.
-         */
-        typedef int64_t time_t;
 
-        /* Patch in timespec */
-        struct timespec {
-                time_t tv_sec; /* Seconds */
-                long tv_nsec; /* Nanoseconds */
-        };
-        /**
-        The time function returns the systems current time stamp.
-        If timer is not a null pointer, the return value is also assigned to the object it points to.
-         */
-        time_t time(time_t *timer);
+#if defined(__AVR__)
 
-        /**
-        The difftime function returns the difference between two binary time stamps,
-        time1 - time0.
-         */
-        int32_t difftime(time_t time1, time_t time0);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
         /**
             The tm structure contains a representation of time 'broken down' into components of the
@@ -160,18 +146,44 @@ extern "C" {
             See the set_dst() function for more information about Daylight Saving.
 
          */
+
         struct tm {
                 int8_t tm_sec;
                 int8_t tm_min;
                 int8_t tm_hour;
                 int8_t tm_mday;
-                int8_t tm_wday;
                 int8_t tm_mon;
                 int16_t tm_year;
+                int8_t tm_wday;
                 int16_t tm_yday;
                 int16_t tm_isdst;
         };
 
+
+        /** \ingroup avr_time */
+        /* @{ */
+
+        /**
+            time_t represents seconds elapsed from Midnight, Jan 1 2000 UTC (the Y2K 'epoch').
+            Its range allows this implementation to represent time up to Tue Feb 7 06:28:15 2136 UTC.
+         */
+
+        /* Patch in timespec */
+        struct timespec {
+                time_t tv_sec; /* Seconds */
+                long tv_nsec; /* Nanoseconds */
+        };
+        /**
+        The time function returns the systems current time stamp.
+        If timer is not a null pointer, the return value is also assigned to the object it points to.
+         */
+        time_t time(time_t *timer);
+
+        /**
+        The difftime function returns the difference between two binary time stamps,
+        time1 - time0.
+         */
+        int32_t difftime(time_t time1, time_t time0);
 
         /**
         This function 'compiles' the elements of a broken-down time structure, returning a binary time stamp.
@@ -183,17 +195,6 @@ extern "C" {
         On successful completion, the values of all elements of timeptr are set to the appropriate range.
          */
         time_t mktime(struct tm * timeptr);
-
-        /**
-        This function 'compiles' the elements of a broken-down time structure, returning a binary time stamp.
-        The elements of timeptr are interpreted as representing UTC.
-
-        The original values of the tm_wday and tm_yday elements of the structure are ignored,
-        and the original values of the other elements are not restricted to the ranges stated for struct tm.
-
-        Unlike mktime(), this function DOES NOT modify the elements of timeptr.
-         */
-        time_t mk_gmtime(const struct tm * timeptr);
 
         /**
         The gmtime function converts the time stamp pointed to by timer into broken-down time,
@@ -330,37 +331,6 @@ extern "C" {
         void system_tick(void);
 
         /**
-            Enumerated labels for the days of the week.
-         */
-        enum _WEEK_DAYS_ {
-                SUNDAY,
-                MONDAY,
-                TUESDAY,
-                WEDNESDAY,
-                THURSDAY,
-                FRIDAY,
-                SATURDAY
-        };
-
-        /**
-            Enumerated labels for the months.
-         */
-        enum _MONTHS_ {
-                JANUARY,
-                FEBRUARY,
-                MARCH,
-                APRIL,
-                MAY,
-                JUNE,
-                JULY,
-                AUGUST,
-                SEPTEMBER,
-                OCTOBER,
-                NOVEMBER,
-                DECEMBER
-        };
-
-        /**
             Return 1 if year is a leap year, zero if it is not.
          */
         uint8_t is_leap_year(int16_t year);
@@ -403,44 +373,6 @@ extern "C" {
             Re-entrant version of iso-week_date.
          */
         void iso_week_date_r(int year, int yday, struct week_date *);
-
-        /**
-            Convert a Y2K time stamp into a FAT file system time stamp.
-         */
-        uint32_t fatfs_time(const struct tm * timeptr);
-
-        /** One hour, expressed in seconds */
-#define ONE_HOUR 3600L
-
-        /** Angular degree, expressed in arc seconds */
-#define ONE_DEGREE 3600L
-
-        /** One day, expressed in seconds */
-#define ONE_DAY 86400L
-
-        /** Difference between the Y2K and the UNIX epochs, in seconds. To convert a Y2K
-            timestamp to UNIX...
-            \code
-            long unix;
-            time_t y2k;
-
-            y2k = time(NULL);
-            unix = y2k + UNIX_OFFSET;
-            \endcode
-         */
-#define UNIX_OFFSET 946684800L
-
-        /** Difference between the Y2K and the NTP epochs, in seconds. To convert a Y2K
-            timestamp to NTP...
-            \code
-            unsigned long ntp;
-            time_t y2k;
-
-            y2k = time(NULL);
-            ntp = y2k + NTP_OFFSET;
-            \endcode
-         */
-#define NTP_OFFSET 3155673600L
 
         /*
          * ===================================================================
@@ -514,5 +446,96 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+#elif defined(__arm__)
+#include <../../arm-none-eabi/include/time.h>
+#else
+#error "I do not know your CPU type. Please send a bug report to <xxxajk@gmail.com>"
+#endif
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+/**
+            Enumerated labels for the days of the week.
+         */
+        enum _WEEK_DAYS_ {
+                SUNDAY,
+                MONDAY,
+                TUESDAY,
+                WEDNESDAY,
+                THURSDAY,
+                FRIDAY,
+                SATURDAY
+        };
+
+        /**
+            Enumerated labels for the months.
+         */
+        enum _MONTHS_ {
+                JANUARY,
+                FEBRUARY,
+                MARCH,
+                APRIL,
+                MAY,
+                JUNE,
+                JULY,
+                AUGUST,
+                SEPTEMBER,
+                OCTOBER,
+                NOVEMBER,
+                DECEMBER
+        };
+
+        /** One hour, expressed in seconds */
+#define ONE_HOUR 3600L
+
+        /** Angular degree, expressed in arc seconds */
+#define ONE_DEGREE 3600L
+
+        /** One day, expressed in seconds */
+#define ONE_DAY 86400L
+
+        /** Difference between the Y2K and the UNIX epochs, in seconds. To convert a Y2K
+            timestamp to UNIX...
+            \code
+            long unix;
+            time_t y2k;
+
+            y2k = time(NULL);
+            unix = y2k + UNIX_OFFSET;
+            \endcode
+         */
+#define UNIX_OFFSET 946684800L
+
+        /** Difference between the Y2K and the NTP epochs, in seconds. To convert a Y2K
+            timestamp to NTP...
+            \code
+            unsigned long ntp;
+            time_t y2k;
+
+            y2k = time(NULL);
+            ntp = y2k + NTP_OFFSET;
+            \endcode
+         */
+#define NTP_OFFSET 3155673600L
+
+        /**
+        This function 'compiles' the elements of a broken-down time structure, returning a binary time stamp.
+        The elements of timeptr are interpreted as representing UTC.
+
+        The original values of the tm_wday and tm_yday elements of the structure are ignored,
+        and the original values of the other elements are not restricted to the ranges stated for struct tm.
+
+        Unlike mktime(), this function DOES NOT modify the elements of timeptr.
+         */
+        time_t mk_gmtime(const struct tm * timeptr);
+
+        /**
+            Convert a Y2K time stamp into a FAT file system time stamp.
+         */
+        uint32_t fatfs_time(const struct tm * timeptr);
+
+#ifdef __cplusplus
+}
+#endif
 #endif              /* TIME_H  */

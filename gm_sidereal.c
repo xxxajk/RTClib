@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -58,3 +59,4 @@ gm_sidereal(const time_t * timer)
     tmp %= ONE_DAY;
     return tmp;
 }
+#endif

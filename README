@@ -4,13 +4,26 @@ forked by Adafruit
 
 and then forked by me... rlameiro :D
 
-Now forked by me xxxajk.
+Now forked, enhanced, and mutilated by me xxxajk.
+
+
 What's new:
-All the standard libc time functions are available, but Epoch is 1/1/1900, and time_t is int64_t.
-I2C is protected by xmem's multitasking lock if you use multitasking.
-You no longer have to 'start' the RTC with begin, or even declare that you use it.
-If you are missing the DS1307, the library automatically reverts to using software RTC.
-There are 3 simplified functions for using the RTC library.
+
+* Preliminary Teensy 3.0 RTC support. Please test!
+
+* AVR:
+  All the standard libc time functions are available.
+  Epoch is 1/1/1900.
+  time_t is an int64_t and does not have the January 19, 2038 overflow problem.
+  I2C is protected by xmem's multitasking lock if you use multitasking.
+  If you are missing the DS1307 chip, the library automatically reverts to
+  using the software millis RTC which is only good for ~49 days.
+
+* You no longer have to 'start' RTC with begin.
+
+* You do not have to declare that you use any particular RTC.
+
+* There are 3 simplified functions for using the entire RTC library.
         Set the time
                 RTCset(const DateTime& dt);
         Get the current time
@@ -18,7 +31,22 @@ There are 3 simplified functions for using the RTC library.
         Find out if RTC is hardware.
                 boolean RTChardware(void);
 
-Notes for users in the far future.
-In the year 2100 you will have to get a new DS1307 and adjust the software because the DS1307 is only
-good to the year 2099. :-)
+* DS1307 specifics:
+  Read and write to DS1307 scratch memory is available, as is the
+  SqwPinMode setting.
 
+TO-DO:
+       Make a unified access method to RTC specific features, such as:
+         * Access to RTC memory
+         * Access to RTC PIN features
+
+Notes for DS1307 users in the far future:
+  In the year 2100 you will have to get a new DS1307 and adjust the software,
+  because the DS1307 is only good to the year 2099. :-)
+
+Notes for Teensy 3.0 users on and after January 19, 2038:
+  time_t in the libc is only 32 bits.
+  The date restarts at December 13, 1901 due to an overflow.
+  Please complain to GNU and the developers of libc about it.
+  For details about this problem, please see:
+    http://en.wikipedia.org/wiki/Year_2038_problem

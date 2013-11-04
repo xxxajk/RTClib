@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -43,3 +44,4 @@ gmtime(const time_t * timeptr)
 	gmtime_r(timeptr, &__tm_store);
 	return &__tm_store;
 }
+#endif

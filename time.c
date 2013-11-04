@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (c)2012 Michael Duane Rice All rights reserved.
  *
@@ -56,3 +57,4 @@ time(time_t * timer)
 		*timer = ret;
 	return ret;
 }
+#endif

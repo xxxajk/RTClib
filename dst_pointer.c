@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -32,3 +33,4 @@
 #include <time.h>
 
 int             (*__dst_ptr) (const time_t *, int32_t *);
+#endif

@@ -2,6 +2,7 @@
 // Released to the public domain! Enjoy!
 
 #include <RTClib.h>
+#if !defined(__arm__)
 
 #define DS1307_ADDRESS 0x68
 
@@ -28,15 +29,18 @@ static long time2long(uint16_t days, uint8_t h, uint8_t m, uint8_t s) {
         return ((days * 24L + h) * 60 + m) * 60 + s;
 }
 #endif
+#endif // ! __arm__
 
 ////////////////////////////////////////////////////////////////////////////////
 // DateTime implementation - ignores time zones and DST changes
 // NOTE: also ignores leap seconds, see http://en.wikipedia.org/wiki/Leap_second
 
+#ifdef __AVR__
 // 64bit time_t -> struct tm
 DateTime::DateTime(time_t t) {
         gmtime_r((const time_t *)&t, &_time);
 }
+#endif
 
 // 32bit time_t -> struct tm
 DateTime::DateTime(int32_t t) {
@@ -163,6 +167,7 @@ static uint8_t decToBcd(uint8_t val) {
         return ( (val / 10 * 16) + (val % 10));
 }
 
+#if !defined(__arm__)
 
 uint8_t RTC_DS1307::begin(const DateTime& dt) {
         XMEM_ACQUIRE_I2C();
@@ -327,8 +332,10 @@ uint8_t RTC_Millis::isrunning(void) {
 RTC_DS1307 RTC_DS1307_RTC;
 RTC_Millis RTC_ARDUINO_MILLIS_RTC;
 static boolean WireStarted = false;
+#endif // ! __arm__
 
 void RTCstart(void) {
+#if !defined(__arm__)
         if (!WireStarted) {
                 WireStarted = true;
                 RTC_ARDUINO_MILLIS_RTC.begin(DateTime(__DATE__, __TIME__));
@@ -337,28 +344,40 @@ void RTCstart(void) {
                         RTC_DS1307_RTC.adjust(DateTime(__DATE__, __TIME__));
                 // Add more RTC as needed.
         }
+#endif
 }
 
 void RTCset(const DateTime& dt) {
+#if defined(__arm__)
+        rtc_set(dt.unixtime());
+#else
         RTCstart(); // Automatic.
         RTC_ARDUINO_MILLIS_RTC.adjust(dt); // Always present.
         if (RTC_DS1307_RTC.isrunning()) {
                 RTC_DS1307_RTC.adjust(dt);
         }
         // Add more RTC as needed.
-
+#endif
 }
 
 DateTime RTCnow(void) {
+#if defined(__arm__)
+        return DateTime(rtc_get());
+#else
         RTCstart(); // Automatic.
         if (RTC_DS1307_RTC.isrunning()) return RTC_DS1307_RTC.now();
         // Add more RTC as needed.
         return RTC_ARDUINO_MILLIS_RTC.now();
+#endif
 }
 
 boolean RTChardware(void) {
+#if defined(__arm__)
+        return true;
+#else
         RTCstart(); // Automatic.
         if (RTC_DS1307_RTC.isrunning()) return true;
         // Add more RTC as needed.
         return false;
+#endif
 }

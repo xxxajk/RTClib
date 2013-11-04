@@ -5,9 +5,11 @@
 
 #ifndef RTCLIB_H
 #define RTCLIB_H
+#ifdef __AVR__
 #include <Wire.h>
 #include <avr/pgmspace.h>
-#include <Arduino.h> // capital A so it is error prone on case-sensitive filesystems
+#endif
+#include <Arduino.h>
 #include "time.h"
 #define WIREWRITE Wire.write
 #define WIREREAD Wire.read
@@ -27,7 +29,9 @@
 
 class DateTime {
 public:
+#ifdef __AVR__
         DateTime(time_t t = 0);
+#endif
         DateTime(int32_t t);
         DateTime(uint16_t year, uint8_t month, uint8_t day,
                 uint8_t hour = 0, uint8_t min = 0, uint8_t sec = 0);
@@ -70,6 +74,8 @@ protected:
         struct tm _time;
 };
 
+#ifndef __arm__
+
 // RTC based on the DS1307 chip connected via I2C and the Wire library
 
 enum Ds1307SqwPinMode {
@@ -105,7 +111,10 @@ public:
 protected:
         static int64_t offset;
 };
-extern RTC_DS1307 RTC_DS1307_RTC;
+
+extern RTC_DS1307 RTC_DS1307_RTC; // To-do: deprecate, and use a features function
+#endif // __arm__
+
 extern void RTCset(const DateTime& dt);
 extern DateTime RTCnow();
 boolean RTChardware(void);

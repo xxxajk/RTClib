@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -63,3 +64,4 @@ moon_phase(const time_t * timestamp)
 
 	return n;
 }
+#endif

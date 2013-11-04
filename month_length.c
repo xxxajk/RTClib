@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -46,3 +47,4 @@ month_length(int year, uint8_t month)
         month++;
     return 30 + (month & 1);
 }
+#endif

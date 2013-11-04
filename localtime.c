@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -42,3 +43,4 @@ localtime(const time_t * timer)
 	localtime_r(timer, &__tm_store);
 	return &__tm_store;
 }
+#endif

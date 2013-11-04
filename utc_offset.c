@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (c)2012 Michael Duane Rice All rights reserved.
  *
@@ -33,3 +34,4 @@
 */
 
 long            __utc_offset=0L;
+#endif

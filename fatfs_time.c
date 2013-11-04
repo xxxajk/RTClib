@@ -33,7 +33,7 @@
 */
 
 #include <time.h>
-
+#include <inttypes.h>
 uint32_t
 fatfs_time(const struct tm * timeptr)
 {

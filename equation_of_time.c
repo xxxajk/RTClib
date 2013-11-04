@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -84,3 +85,4 @@ equation_of_time(const time_t * timer)
     return -s;
 
 }
+#endif

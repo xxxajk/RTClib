@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (c)2012 Michael Duane Rice All rights reserved.
  *
@@ -55,3 +56,4 @@ solar_noon(const time_t * timer)
     return t;
 
 }
+#endif

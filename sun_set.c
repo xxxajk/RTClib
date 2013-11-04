@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (c)2012 Michael Duane Rice All rights reserved.
  *
@@ -48,3 +49,4 @@ sun_set(const time_t * timer)
     return t;
 
 }
+#endif

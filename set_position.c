@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -42,3 +43,4 @@ set_position(long lat, long lon)
 	__latitude = lat;
 	__longitude = lon;
 }
+#endif

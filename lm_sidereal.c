@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -45,3 +46,4 @@ lm_sidereal(const time_t * timer)
     n %= ONE_DAY;
     return n;
 }
+#endif

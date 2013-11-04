@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -58,3 +59,4 @@ localtime_r(const time_t * timer, struct tm * timeptr)
 	gmtime_r(&lt, timeptr);
 	timeptr->tm_isdst = dst;
 }
+#endif

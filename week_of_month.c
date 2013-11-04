@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (c)2012 Michael Duane Rice All rights reserved.
  *
@@ -60,3 +61,4 @@ week_of_month(const struct tm * timestruct, uint8_t base)
 	return n / 7 + 1;
 
 }
+#endif

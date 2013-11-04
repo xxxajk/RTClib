@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -53,3 +54,4 @@ set_system_time(time_t timestamp)
 				 ::
 	);
 }
+#endif

@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -41,3 +42,4 @@ ctime_r(const time_t * timeptr, char *buffer)
 	localtime_r(timeptr, &calendar);
 	asctime_r(&calendar, buffer);
 }
+#endif

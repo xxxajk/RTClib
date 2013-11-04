@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * ©2012 Michael Duane Rice All rights reserved.
  *
@@ -45,3 +46,4 @@ ctime(const time_t * timeptr)
 	asctime_r(&calendar, __asc_store);
 	return __asc_store;
 }
+#endif

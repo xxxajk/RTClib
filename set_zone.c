@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -39,3 +40,4 @@ set_zone(long z)
 {
 	__utc_offset = z;
 }
+#endif

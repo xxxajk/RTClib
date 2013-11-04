@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (c)2012 Michael Duane Rice All rights reserved.
  *
@@ -37,3 +38,4 @@
 char            __store[26];
 
 char           *__asc_store = __store;
+#endif

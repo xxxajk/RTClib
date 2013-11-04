@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -39,3 +40,4 @@ difftime(time_t t1, time_t t2)
 {
 	return t1 - t2;
 }
+#endif

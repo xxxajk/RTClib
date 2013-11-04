@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -54,3 +55,4 @@ is_leap_year(int year)
 
     return 0;
 }
+#endif

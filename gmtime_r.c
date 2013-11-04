@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -142,3 +143,4 @@ gmtime_r(const time_t * timer, struct tm * timeptr)
     timeptr->tm_mday++; /* tm_mday is 1 based */
 
 }
+#endif

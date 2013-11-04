@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -80,3 +81,4 @@ asctime_r(const struct tm * timeptr, char *buffer)
 	__print_lz(result.rem,buffer,0);
 
 }
+#endif

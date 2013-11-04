@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (c)2012 Michael Duane Rice All rights reserved.
  *
@@ -42,3 +43,4 @@ asctime(const struct tm * timeptr)
 	asctime_r(timeptr, __asc_store);
 	return __asc_store;
 }
+#endif

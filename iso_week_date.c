@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (c)2012 Michael Duane Rice All rights reserved.
  *
@@ -49,3 +50,4 @@ iso_week_date(int y, int yday)
     iso_week_date_r(y, yday, iso);
     return iso;
 }
+#endif

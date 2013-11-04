@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (c)2012 Michael Duane Rice All rights reserved.
  *
@@ -112,3 +113,4 @@ iso_week_date_r(int y, int yday, struct week_date * iso)
         iso->day = wday;
     }
 }
+#endif

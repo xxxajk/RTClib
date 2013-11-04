@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -30,3 +31,4 @@
 
 long            __latitude;
 long            __longitude;
+#endif

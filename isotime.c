@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -42,3 +43,4 @@ isotime(const struct tm * tmptr)
 	isotime_r(tmptr, __asc_store);
 	return __asc_store;
 }
+#endif

@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (c)2012 Michael Duane Rice All rights reserved.
  *
@@ -320,3 +321,4 @@ strftime(char *buffer, size_t limit, const char *pattern, const struct tm * time
     *buffer = 0;
     return count;
 }
+#endif

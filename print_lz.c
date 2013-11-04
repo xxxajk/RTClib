@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -43,3 +44,4 @@ __print_lz(int i, char *buffer, char s)
 	*buffer++ = result.rem + '0';
 	*buffer = s;
 }
+#endif

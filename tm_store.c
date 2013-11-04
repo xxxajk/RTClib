@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (c)2012 Michael Duane Rice All rights reserved.
  *
@@ -35,3 +36,4 @@
 #include <time.h>
 
 struct tm       __tm_store;
+#endif

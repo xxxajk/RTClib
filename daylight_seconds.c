@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -70,3 +71,4 @@ daylight_seconds(const time_t * timer)
 
     return n;
 }
+#endif

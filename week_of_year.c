@@ -1,3 +1,4 @@
+#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -56,3 +57,4 @@ week_of_year(const struct tm * timestruct, uint8_t base)
 
 	return n / 7 + 1;
 }
+#endif
