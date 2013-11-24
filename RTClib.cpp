@@ -14,6 +14,7 @@
 const uint8_t daysInMonth [] PROGMEM = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}; //has to be const or compiler compaints
 
 // number of days since 2000/01/01, valid for 2001..2099
+
 static uint16_t date2days(uint16_t y, uint8_t m, uint8_t d) {
         if (y >= 2000)
                 y -= 2000;
@@ -37,18 +38,21 @@ static long time2long(uint16_t days, uint8_t h, uint8_t m, uint8_t s) {
 
 #ifdef __AVR__
 // 64bit time_t -> struct tm
+
 DateTime::DateTime(time_t t) {
         gmtime_r((const time_t *)&t, &_time);
 }
 #endif
 
 // 32bit time_t -> struct tm
+
 DateTime::DateTime(int32_t t) {
         time_t x = t;
         gmtime_r((const time_t *)&x, &_time);
 }
 
 // YY/MM/DD/HH/mm/SS -> struct tm
+
 DateTime::DateTime(uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t min, uint8_t sec) {
         _time.tm_year = year - 1900;
         _time.tm_mon = month;
@@ -61,6 +65,7 @@ DateTime::DateTime(uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint
 }
 
 // fat time -> struct tm
+
 DateTime::DateTime(uint16_t fdate, uint16_t ftime) {
         /*
          * Time pre-packed for fat file system
@@ -94,10 +99,11 @@ static uint8_t conv2d(const char* p) {
 //   DateTime now (__DATE__, __TIME__);
 // NOTE: using PSTR would further reduce the RAM footprint
 // NOTE: This is a short version of strptime
+
 DateTime::DateTime(const char* date, const char* time) {
         // sample input: date = "Dec 26 2009", time = "12:34:56"
         uint8_t m = 0;
-        _time.tm_year = ((conv2d(date + 7)*100) + conv2d(date+9)) - 1900;
+        _time.tm_year = ((conv2d(date + 7)*100) + conv2d(date + 9)) - 1900;
         switch (date[0]) {
                 case 'J': m = date[1] == 'a' ? 1: m = date[2] == 'n' ? 6: 7;
                         break;
@@ -125,6 +131,8 @@ DateTime::DateTime(const char* date, const char* time) {
         mktime(&_time);
 }
 
+// NOTE! teensy3.0 uses unix time. So we need to reverse a few things, and do extra processing on ARM
+
 /**
  *
  * @return Time pre-packed for fat file system.
@@ -132,7 +140,12 @@ DateTime::DateTime(const char* date, const char* time) {
  */
 
 time_t DateTime::FatPacked(void) const {
+#if defined(__arm__)
+        DateTime x=DateTime(this->secondstime());
+        return fatfs_time(&x._time);
+#else
         return fatfs_time(&_time);
+#endif
 }
 
 /**
@@ -141,7 +154,11 @@ time_t DateTime::FatPacked(void) const {
  */
 
 time_t DateTime::unixtime(void) const {
+#if defined(__arm__)
+        return mk_gmtime(&_time);
+#else
         return (mk_gmtime(&_time) + UNIX_OFFSET);
+#endif
 }
 
 /**
@@ -149,7 +166,11 @@ time_t DateTime::unixtime(void) const {
  * @return Time in seconds since 1/1/1900
  */
 time_t DateTime::secondstime(void) const {
+#if defined(__arm__)
+        return (mk_gmtime(&_time) + UNIX_OFFSET);
+#else
         return mk_gmtime(&_time);
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -177,8 +198,6 @@ uint8_t RTC_DS1307::begin(const DateTime& dt) {
         if (x) return 0;
         return 1;
 }
-
-
 
 uint8_t RTC_DS1307::isrunning(void) {
         XMEM_ACQUIRE_I2C();

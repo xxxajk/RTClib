@@ -71,7 +71,7 @@ public:
         time_t FatPacked(void) const;
 
 protected:
-        struct tm _time;
+        struct tm _time; // since 1/1/1900
 };
 
 #ifndef __arm__
