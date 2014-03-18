@@ -5,6 +5,7 @@
 
 #ifndef RTCLIB_H
 #define RTCLIB_H
+#ifdef	__cplusplus
 #ifdef __AVR__
 #include <Wire.h>
 #include <avr/pgmspace.h>
@@ -39,7 +40,13 @@ public:
         DateTime(uint16_t fdate, uint16_t ftime);
 
         uint16_t year(void) const {
+
+#ifdef __arm__
+                // arm uses a different epoch
+                return _time.tm_year + 1930;
+#else
                 return _time.tm_year + 1900;
+#endif
         }
 
         uint8_t month(void) const {
@@ -74,12 +81,17 @@ protected:
         struct tm _time; // since 1/1/1900
 };
 
-#ifndef __arm__
 
+#ifndef __arm__
 // RTC based on the DS1307 chip connected via I2C and the Wire library
 
-enum Ds1307SqwPinMode {
-        Ds1307SquareWaveOFF = 0x00, Ds1307SquareWaveON = 0x80, Ds1307SquareWave1HZ = 0x10, Ds1307SquareWave4kHz = 0x11, Ds1307SquareWave8kHz = 0x12, Ds1307SquareWave32kHz = 0x13
+enum SqwPinMode {
+        SquareWaveOFF   = 0x00,
+        SquareWaveON    = 0x80,
+        SquareWave1HZ   = 0x10,
+        SquareWave4kHz  = 0x11,
+        SquareWave8kHz  = 0x12,
+        SquareWave32kHz = 0x13
 };
 
 class RTC_DS1307 {
@@ -91,8 +103,8 @@ public:
         static DateTime now();
         static uint8_t readMemory(uint8_t offset, uint8_t* data, uint8_t length);
         static uint8_t writeMemory(uint8_t offset, uint8_t* data, uint8_t length);
-        static Ds1307SqwPinMode readSqwPinMode();
-        static void writeSqwPinMode(Ds1307SqwPinMode mode);
+        static SqwPinMode readSqwPinMode();
+        static void writeSqwPinMode(SqwPinMode mode);
 };
 
 // RTC using the internal millis() clock, has to be initialized before use
@@ -113,10 +125,29 @@ protected:
 };
 
 extern RTC_DS1307 RTC_DS1307_RTC; // To-do: deprecate, and use a features function
+#else // __arm__
+enum SqwPinMode {
+        SquareWaveOFF   = 0,
+        SquareWaveON    = 0x80,
+        SquareWave1HZ   = 1,
+        SquareWave32kHz = 2
+};
 #endif // __arm__
 
 extern void RTCset(const DateTime& dt);
 extern DateTime RTCnow();
 boolean RTChardware(void);
+uint8_t RTCreadMemory(uint8_t offset, uint8_t* data, uint8_t length);
+uint8_t RTCwriteMemory(uint8_t offset, uint8_t* data, uint8_t length);
+SqwPinMode RTCreadSqwPinMode();
+void RTCwriteSqwPinMode(SqwPinMode mode);
+
+
+extern "C" {
+#endif
+        extern void RTC_systime(void);
+#ifdef	__cplusplus
+}
+#endif
 
 #endif // RTCLIB_H

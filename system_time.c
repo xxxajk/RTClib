@@ -32,7 +32,6 @@
 /*
 	The system time stamp.
 */
-#include <time.h>
-
+#include "time.h"
 volatile time_t __system_time;
 #endif

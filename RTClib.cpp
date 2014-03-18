@@ -2,34 +2,10 @@
 // Released to the public domain! Enjoy!
 
 #include <RTClib.h>
+
+// TO-DO: Still allow (and prefer) DS chip.
 #if !defined(__arm__)
-
 #define DS1307_ADDRESS 0x68
-
-
-#if 0
-////////////////////////////////////////////////////////////////////////////////
-// utility code, some of this could be exposed in the DateTime API if needed
-
-const uint8_t daysInMonth [] PROGMEM = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}; //has to be const or compiler compaints
-
-// number of days since 2000/01/01, valid for 2001..2099
-
-static uint16_t date2days(uint16_t y, uint8_t m, uint8_t d) {
-        if (y >= 2000)
-                y -= 2000;
-        uint16_t days = d;
-        for (uint8_t i = 1; i < m; ++i)
-                days += pgm_read_byte(daysInMonth + i - 1);
-        if (m > 2 && y % 4 == 0)
-                ++days;
-        return days + 365 * y + (y + 3) / 4 - 1;
-}
-
-static long time2long(uint16_t days, uint8_t h, uint8_t m, uint8_t s) {
-        return ((days * 24L + h) * 60 + m) * 60 + s;
-}
-#endif
 #endif // ! __arm__
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -90,7 +66,7 @@ DateTime::DateTime(uint16_t fdate, uint16_t ftime) {
 
 static uint8_t conv2d(const char* p) {
         uint8_t v = 0;
-        if ('0' <= *p && *p <= '9')
+        if('0' <= *p && *p <= '9')
                 v = *p - '0';
         return 10 * v + *++p - '0';
 }
@@ -104,7 +80,7 @@ DateTime::DateTime(const char* date, const char* time) {
         // sample input: date = "Dec 26 2009", time = "12:34:56"
         uint8_t m = 0;
         _time.tm_year = ((conv2d(date + 7)*100) + conv2d(date + 9)) - 1900;
-        switch (date[0]) {
+        switch(date[0]) {
                 case 'J': m = date[1] == 'a' ? 1: m = date[2] == 'n' ? 6: 7;
                         break;
                 case 'F': m = 2;
@@ -141,7 +117,7 @@ DateTime::DateTime(const char* date, const char* time) {
 
 time_t DateTime::FatPacked(void) const {
 #if defined(__arm__)
-        DateTime x=DateTime(this->secondstime());
+        DateTime x = DateTime(this->secondstime());
         return fatfs_time(&x._time);
 #else
         return fatfs_time(&_time);
@@ -195,7 +171,7 @@ uint8_t RTC_DS1307::begin(const DateTime& dt) {
         Wire.beginTransmission(DS1307_ADDRESS);
         uint8_t x = Wire.endTransmission();
         XMEM_RELEASE_I2C();
-        if (x) return 0;
+        if(x) return 0;
         return 1;
 }
 
@@ -204,7 +180,7 @@ uint8_t RTC_DS1307::isrunning(void) {
         uint8_t ss = 0;
         Wire.beginTransmission(DS1307_ADDRESS);
         WIREWRITE((uint8_t)0);
-        if (!Wire.endTransmission()) {
+        if(!Wire.endTransmission()) {
                 Wire.requestFrom(DS1307_ADDRESS, 1);
                 ss = WIREREAD();
                 ss = !((ss >> 7) &0x01);
@@ -274,10 +250,10 @@ uint8_t RTC_DS1307::readMemory(uint8_t offset, uint8_t* data, uint8_t length) {
 
         Wire.beginTransmission(DS1307_ADDRESS);
         WIREWRITE(0x08 + offset);
-        if (!Wire.endTransmission()) {
+        if(!Wire.endTransmission()) {
 
                 Wire.requestFrom((uint8_t)DS1307_ADDRESS, (uint8_t)length);
-                while (Wire.available() > 0 && bytes_read < length) {
+                while(Wire.available() > 0 && bytes_read < length) {
                         data[bytes_read] = WIREREAD();
                         bytes_read++;
                 }
@@ -292,12 +268,12 @@ uint8_t RTC_DS1307::writeMemory(uint8_t offset, uint8_t* data, uint8_t length) {
         Wire.beginTransmission(DS1307_ADDRESS);
         WIREWRITE(0x08 + offset);
         uint8_t bytes_written = WIREWRITE(data, length);
-        if (Wire.endTransmission()) bytes_written = -1;
+        if(Wire.endTransmission()) bytes_written = -1;
         XMEM_RELEASE_I2C();
         return bytes_written;
 }
 
-Ds1307SqwPinMode RTC_DS1307::readSqwPinMode() {
+SqwPinMode RTC_DS1307::readSqwPinMode() {
         XMEM_ACQUIRE_I2C();
         int mode;
 
@@ -310,10 +286,10 @@ Ds1307SqwPinMode RTC_DS1307::readSqwPinMode() {
         XMEM_RELEASE_I2C();
 
         mode &= 0x93;
-        return static_cast<Ds1307SqwPinMode>(mode);
+        return static_cast<SqwPinMode>(mode);
 }
 
-void RTC_DS1307::writeSqwPinMode(Ds1307SqwPinMode mode) {
+void RTC_DS1307::writeSqwPinMode(SqwPinMode mode) {
         XMEM_ACQUIRE_I2C();
         Wire.beginTransmission(DS1307_ADDRESS);
         WIREWRITE(0x07);
@@ -355,11 +331,11 @@ static boolean WireStarted = false;
 
 void RTCstart(void) {
 #if !defined(__arm__)
-        if (!WireStarted) {
+        if(!WireStarted) {
                 WireStarted = true;
                 RTC_ARDUINO_MILLIS_RTC.begin(DateTime(__DATE__, __TIME__));
                 Wire.begin();
-                if (!RTC_DS1307_RTC.isrunning())
+                if(!RTC_DS1307_RTC.isrunning())
                         RTC_DS1307_RTC.adjust(DateTime(__DATE__, __TIME__));
                 // Add more RTC as needed.
         }
@@ -367,12 +343,12 @@ void RTCstart(void) {
 }
 
 void RTCset(const DateTime& dt) {
-#if defined(__arm__)
+#if defined(__arm__) && defined(CORE_TEENSY)
         rtc_set(dt.unixtime());
 #else
         RTCstart(); // Automatic.
         RTC_ARDUINO_MILLIS_RTC.adjust(dt); // Always present.
-        if (RTC_DS1307_RTC.isrunning()) {
+        if(RTC_DS1307_RTC.isrunning()) {
                 RTC_DS1307_RTC.adjust(dt);
         }
         // Add more RTC as needed.
@@ -380,23 +356,112 @@ void RTCset(const DateTime& dt) {
 }
 
 DateTime RTCnow(void) {
-#if defined(__arm__)
+#if defined(__arm__) && defined(CORE_TEENSY)
         return DateTime(rtc_get());
 #else
         RTCstart(); // Automatic.
-        if (RTC_DS1307_RTC.isrunning()) return RTC_DS1307_RTC.now();
+        if(RTC_DS1307_RTC.isrunning()) return RTC_DS1307_RTC.now();
         // Add more RTC as needed.
         return RTC_ARDUINO_MILLIS_RTC.now();
 #endif
 }
 
 boolean RTChardware(void) {
-#if defined(__arm__)
+#if defined(__arm__) && defined(CORE_TEENSY)
         return true;
 #else
         RTCstart(); // Automatic.
-        if (RTC_DS1307_RTC.isrunning()) return true;
+        if(RTC_DS1307_RTC.isrunning()) return true;
         // Add more RTC as needed.
         return false;
 #endif
+}
+
+boolean RTChasRAM(void) {
+#if defined(__arm__) && defined(CORE_TEENSY)
+        return false;
+#else
+        RTCstart(); // Automatic.
+        if(RTC_DS1307_RTC.isrunning()) return true;
+        // Add more RTC as needed.
+        return false;
+#endif
+
+}
+
+uint8_t RTCreadMemory(uint8_t offset, uint8_t* data, uint8_t length) {
+#if defined(__arm__) && defined(CORE_TEENSY)
+        return 0;
+#else
+        if(RTChardware()) return RTC_DS1307_RTC.readMemory(offset, data, length);
+        else
+                return 0;
+#endif
+}
+
+uint8_t RTCwriteMemory(uint8_t offset, uint8_t* data, uint8_t length) {
+#if defined(__arm__) && defined(CORE_TEENSY)
+        return 0;
+#else
+        if(RTChardware()) return RTC_DS1307_RTC.writeMemory(offset, data, length);
+        else
+                return 0;
+
+#endif
+}
+
+SqwPinMode RTCreadSqwPinMode() {
+#if defined(__arm__) && defined(CORE_TEENSY)
+        if((*portConfigRegister(31) & 0x00000700UL) == 0x00000700UL) {
+                if(SIM_SOPT2 & SIM_SOPT2_RTCCLKOUTSEL) return SquareWave32kHz;
+                return SquareWave1HZ;
+        } else {
+                if(digitalRead(31)) return SquareWaveON;
+        }
+#else
+        if(RTChardware()) return RTC_DS1307_RTC.readSqwPinMode();
+        else
+#endif
+                return SquareWaveOFF;
+
+}
+
+void RTCwriteSqwPinMode(SqwPinMode mode) {
+#if defined(__arm__) && defined(CORE_TEENSY)
+
+        switch(mode) {
+                case SquareWaveOFF:
+                        pinMode(31, OUTPUT);
+                        digitalWriteFast(31, LOW);
+                        break;
+                case SquareWaveON:
+                        pinMode(31, OUTPUT);
+                        digitalWriteFast(31, HIGH);
+                        break;
+                case SquareWave1HZ:
+                        pinMode(31, OUTPUT); // Set with a known default.
+                        // This is an 'advanced' pin mode. Set to Alt 7 (RTC_CLK output)
+                        *portConfigRegister(31) = (*portConfigRegister(31) & 0xFFFFF8FFUL) | 0x00000700UL;
+
+                        SIM_SOPT2 = (SIM_SOPT2 & (~(SIM_SOPT2_CLKOUTSEL(7) | SIM_SOPT2_RTCCLKOUTSEL))) | SIM_SOPT2_CLKOUTSEL(5);
+                        break;
+                case SquareWave32kHz:
+                        pinMode(31, OUTPUT); // Set with a known default.
+                        // This is an 'advanced' pin mode. Set to Alt 7 (RTC_CLK output)
+                        *portConfigRegister(31) = (*portConfigRegister(31) & 0xFFFFF8FFUL) | 0x00000700UL;
+
+                        SIM_SOPT2 = (SIM_SOPT2 & (~SIM_SOPT2_CLKOUTSEL(7))) | SIM_SOPT2_CLKOUTSEL(5) | SIM_SOPT2_RTCCLKOUTSEL;
+                        break;
+        }
+#else
+        if(RTChardware()) RTC_DS1307_RTC.writeSqwPinMode(mode);
+#endif
+}
+
+// C interface... Yes, really... Just call this before using time()
+extern "C" {
+
+        void RTC_systime(void) {
+                set_system_time(RTCnow().unixtime());
+        }
 }

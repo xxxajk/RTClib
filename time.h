@@ -98,9 +98,10 @@
 
 #ifndef TIME_H
 #define TIME_H
-
 #ifdef __cplusplus
 extern "C" {
+#else
+#include "RTClib.h"
 #endif
 
 
