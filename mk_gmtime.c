@@ -34,7 +34,7 @@
 
 */
 
-#include <time.h>
+#include "time.h"
 
 time_t
 mk_gmtime(const struct tm * timeptr)

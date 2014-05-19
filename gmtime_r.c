@@ -31,7 +31,7 @@
 
 /* Re entrant version of gmtime(). */
 
-#include <time.h>
+#include "time.h"
 #include <stdlib.h>
 #include <inttypes.h>
 

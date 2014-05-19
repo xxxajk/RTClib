@@ -44,7 +44,7 @@
 
 */
 
-#include <time.h>
+#include "time.h"
 
 void
 iso_week_date_r(int y, int yday, struct week_date * iso)

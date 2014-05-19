@@ -34,7 +34,7 @@
 	zone and Daylight savings offset, then break it down into calendar time.
 */
 
-#include <time.h>
+#include "time.h"
 
 extern long     __utc_offset;
 

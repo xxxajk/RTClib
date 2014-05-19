@@ -33,7 +33,7 @@
     Return the time of solar noon at the observers position
 */
 
-#include <time.h>
+#include "time.h"
 
 extern long     __longitude;
 

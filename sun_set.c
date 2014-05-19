@@ -33,7 +33,7 @@
     Return the approximate time of sun set.
 */
 
-#include <time.h>
+#include "time.h"
 
 time_t
 sun_set(const time_t * timer)

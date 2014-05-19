@@ -33,7 +33,7 @@
 	Standard ctime(). We have to break down the time stamp, print it into our
 	private buffer, and return the buffer.
 */
-#include <time.h>
+#include "time.h"
 
 extern char    *__asc_store;
 

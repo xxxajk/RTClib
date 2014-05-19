@@ -33,7 +33,7 @@
 	Re-entrant version of asctime().
 
 */
-#include <time.h>
+#include "time.h"
 #include <stdlib.h>
 
 #ifdef __MEMX

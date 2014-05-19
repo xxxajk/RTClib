@@ -34,7 +34,7 @@
 	returning that object.
 */
 
-#include <time.h>
+#include "time.h"
 
 extern struct tm __tm_store;
 

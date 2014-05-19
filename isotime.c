@@ -33,7 +33,7 @@
 	This function returns ISO8601 formatted time, in our private buffer.
 */
 
-#include <time.h>
+#include "time.h"
 
 extern char    *__asc_store;
 

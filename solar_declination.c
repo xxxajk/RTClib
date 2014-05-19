@@ -41,7 +41,7 @@
     the 136 year range of this library.
 */
 
-#include <time.h>
+#include "time.h"
 #include <math.h>
 #include "ephemera_common.h"
 

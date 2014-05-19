@@ -34,7 +34,7 @@
 */
 
 #include <inttypes.h>
-#include <time.h>
+#include "time.h"
 
 extern int      (*__dst_ptr) (const time_t *, int32_t *);
 

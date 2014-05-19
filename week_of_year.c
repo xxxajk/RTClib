@@ -37,7 +37,7 @@
 	Return value ranges from 0 to 52.
 */
 
-#include <time.h>
+#include "time.h"
 
 uint8_t
 week_of_year(const struct tm * timestruct, uint8_t base)

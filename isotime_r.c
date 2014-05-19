@@ -34,7 +34,7 @@
 */
 
 #include <stdlib.h>
-#include <time.h>
+#include "time.h"
 
 extern void __print_lz(int , char *, char );
 

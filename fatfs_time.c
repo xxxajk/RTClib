@@ -32,7 +32,7 @@
 	Return a value suitable for use as a file system time stamp.
 */
 
-#include <time.h>
+#include "time.h"
 #include <inttypes.h>
 uint32_t
 fatfs_time(const struct tm * timeptr)

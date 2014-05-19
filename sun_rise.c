@@ -33,7 +33,7 @@
     Return the approximate time of sun rise.
 */
 
-#include <time.h>
+#include "time.h"
 
 time_t
 sun_rise(const time_t * timer)

@@ -32,7 +32,7 @@
 /*
 	Re entrant version of ctime()
 */
-#include <time.h>
+#include "time.h"
 
 void
 ctime_r(const time_t * timeptr, char *buffer)

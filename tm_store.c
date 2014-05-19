@@ -33,7 +33,7 @@
 	Private allocation, used by gmtime() and localtime()
 */
 
-#include <time.h>
+#include "time.h"
 
 struct tm       __tm_store;
 #endif

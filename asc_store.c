@@ -33,7 +33,7 @@
 	Private allocation, shared between asctime() and isotime()
 */
 
-#include <time.h>
+#include "time.h"
 
 char            __store[26];
 

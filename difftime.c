@@ -33,7 +33,7 @@
 	The C90 standard specifies this returns a 'double. Since we do not have a true double,
 	we return a work alike type.
 */
-#include <time.h>
+#include "time.h"
 
 int32_t
 difftime(time_t t1, time_t t2)

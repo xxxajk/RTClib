@@ -269,7 +269,7 @@ extern "C" {
         size_t strftime(char *s, size_t maxsize, const char *format, const struct tm * timeptr);
 
         /**
-            Specify the Daylight Saving function.
+            Specify the Daylight Saving function. OBSOLETE DO NOT USE!!!
 
             The Daylight Saving function should examine its parameters to determine whether
             Daylight Saving is in effect, and return a value appropriate for tm_isdst.
@@ -456,6 +456,13 @@ extern "C" {
 #endif
 #elif defined(__arm__)
 #include <../../arm-none-eabi/include/time.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+void set_system_time(time_t timestamp);
+#ifdef __cplusplus
+}
+#endif
 #else
 #error "I do not know your CPU type. Please send a bug report to <xxxajk@gmail.com>"
 #endif

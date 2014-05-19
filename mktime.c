@@ -34,7 +34,7 @@
 	a binary time stamp. The process is then reversed to 'normalize' timeptr.
 */
 
-#include <time.h>
+#include "time.h"
 
 extern long     __utc_offset;
 

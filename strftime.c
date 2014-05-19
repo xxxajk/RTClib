@@ -35,7 +35,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <time.h>
+#include "time.h"
 
 extern long     __utc_offset;
 

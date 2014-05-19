@@ -1,4 +1,3 @@
-#ifdef __AVR__
 /*
  * (c)2012 Michael Duane Rice All rights reserved.
  *
@@ -30,31 +29,64 @@
 /* $Id$ */
 
 /*
-	Standard time() function. Copying from __system_time must be atomic, since it
-	may be incremented at interrupt time.
-*/
-#include <time.h>
+        Standard time() function. Copying from __system_time must be atomic, since it
+        may be incremented at interrupt time.
+ */
+#include "time.h"
 #include <inttypes.h>
+#include <util/atomic.h>
 
 extern volatile time_t __system_time;
 
-time_t
-time(time_t * timer)
-{
-	time_t          ret;
+#if 0
 
-	asm             volatile(
-			                   "in __tmp_reg__, __SREG__" "\n\t"
-				                 "cli" "\n\t"
-				 ::
-	);
-	ret = __system_time;
-	asm             volatile(
-			                  "out __SREG__, __tmp_reg__" "\n\t"
-				 ::
-	);
-	if (timer)
-		*timer = ret;
-	return ret;
+/* TO-DO: Implement _gettimeofday for glibc instead of overriding time() */
+#ifdef ARDUINO
+#include <Arduino.h>
+#endif
+#if defined(__arm__) && defined(CORE_TEENSY)
+extern long __utc_offset;
+int _gettimeofday(struct timeval *tv, struct timezone *tz) {
+        RTC_systime(); /* Patch in to set current time here. */
+        if(tv) {
+
+                ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+                        tv.time_t = __system_time;
+                }
+        }
+        if(tz) {
+                /* Always report 0 for now, this library wants to use _seconds_ not minutes. */
+                tz.tz_minuteswest = __utc_offset / ONE_HOUR;
+        }
 }
+#else
+
+time_t
+time(time_t * timer) {
+        time_t ret;
+        RTC_systime(); /* Patch in to set current time here. */
+
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+                ret = __system_time;
+        }
+        if(timer)
+                *timer = ret;
+        return ret;
+}
+#endif
+#else
+
+time_t
+time(time_t * timer) {
+        time_t ret;
+        RTC_systime(); /* Patch in to set current time here. */
+
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+                ret = __system_time;
+        }
+        if(timer)
+                *timer = ret;
+        return ret;
+}
+
 #endif

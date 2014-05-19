@@ -458,7 +458,7 @@ void RTCwriteSqwPinMode(SqwPinMode mode) {
 #endif
 }
 
-// C interface... Yes, really... Just call this before using time()
+// C interface... Yes, really... We just call this before using time()
 extern "C" {
 
         void RTC_systime(void) {

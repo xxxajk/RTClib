@@ -32,7 +32,7 @@
 /*
     Local Mean Sidereal Time. See gm_sidereal() for info.
 */
-#include <time.h>
+#include "time.h"
 
 extern long     __longitude;
 

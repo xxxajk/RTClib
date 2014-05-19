@@ -33,7 +33,7 @@
 	Standard asctime(), we simply punt to the re-entrant version.
 */
 
-#include <time.h>
+#include "time.h"
 
 extern char    *__asc_store;
 

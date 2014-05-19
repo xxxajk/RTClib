@@ -1,4 +1,3 @@
-#ifdef __AVR__
 /*
  * (C)2012 Michael Duane Rice All rights reserved.
  *
@@ -36,22 +35,14 @@
  * incremented at interrupt time.
  */
 
-#include <time.h>
+#include "time.h"
+#include <util/atomic.h>
 extern volatile time_t __system_time;
 
 void
-set_system_time(time_t timestamp)
-{
+set_system_time(time_t timestamp) {
 
-	asm             volatile(
-			                   "in __tmp_reg__, __SREG__" "\n\t"
-				                 "cli" "\n\t"
-				 ::
-	);
-	__system_time = timestamp;
-	asm             volatile(
-			                  "out __SREG__, __tmp_reg__" "\n\t"
-				 ::
-	);
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+                __system_time = timestamp;
+        }
 }
-#endif

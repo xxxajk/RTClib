@@ -35,7 +35,7 @@
 
 */
 
-#include <time.h>
+#include "time.h"
 #include <math.h>
 
 extern long     __latitude;
