@@ -46,15 +46,20 @@ DateTime::DateTime(uint16_t fdate, uint16_t ftime) {
         /*
          * Time pre-packed for fat file system
          *
-         *       bit31:25 year
-         *       bit24:21 month
-         *       bit20:16 day
+         *       7 bit31:25 year
+         *       4 bit24:21 month
+         *       5 bit20:16 day
          * ------------------------
-         *       bit15:11 h
-         *       bit10:5 m
-         *       bit4:0 s (2 second resolution)
+         *       5 bit15:11 h
+         *       6 bit10:5 m
+         *       5 bit4:0 s (2 second resolution)
          */
+#if defined(__arm__) && defined(CORE_TEENSY)
+        // Messed up EPOCH
+        _time.tm_year = ((fdate >> 9) & 0x7f) + 50;
+#else
         _time.tm_year = (1980 + ((fdate >> 9) & 0x7f)) - 1900;
+#endif
         _time.tm_mon = (fdate >> 5) & 0x0f;
         _time.tm_mday = fdate & 0x1f;
         _time.tm_hour = (ftime >> 11) & 0x1f;
