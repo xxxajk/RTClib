@@ -35,58 +35,22 @@
 #include "time.h"
 #include <inttypes.h>
 #include <util/atomic.h>
+#include <RTClib.h>
 
-extern volatile time_t __system_time;
 
-#if 0
+extern "C" {
+        extern volatile time_t __system_time;
 
-/* TO-DO: Implement _gettimeofday for glibc instead of overriding time() */
-#ifdef ARDUINO
-#include <Arduino.h>
-#endif
-#if defined(__arm__) && defined(CORE_TEENSY)
-extern long __utc_offset;
-int _gettimeofday(struct timeval *tv, struct timezone *tz) {
-        RTC_systime(); /* Patch in to set current time here. */
-        if(tv) {
+        time_t
+        time(time_t * timer) {
+                time_t ret;
+                RTC_systime(); /* Patch in to set current time here. */
 
                 ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-                        tv.time_t = __system_time;
+                        ret = __system_time;
                 }
-        }
-        if(tz) {
-                /* Always report 0 for now, this library wants to use _seconds_ not minutes. */
-                tz.tz_minuteswest = __utc_offset / ONE_HOUR;
+                if(timer)
+                        *timer = ret;
+                return ret;
         }
 }
-#else
-
-time_t
-time(time_t * timer) {
-        time_t ret;
-        RTC_systime(); /* Patch in to set current time here. */
-
-        ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-                ret = __system_time;
-        }
-        if(timer)
-                *timer = ret;
-        return ret;
-}
-#endif
-#else
-
-time_t
-time(time_t * timer) {
-        time_t ret;
-        RTC_systime(); /* Patch in to set current time here. */
-
-        ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-                ret = __system_time;
-        }
-        if(timer)
-                *timer = ret;
-        return ret;
-}
-
-#endif
