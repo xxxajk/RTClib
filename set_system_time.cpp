@@ -36,7 +36,11 @@
  */
 
 #include "time.h"
+#if defined(ARDUINO_ARCH_SAM)
+#include "ARM_ATOMIC.h"
+#else
 #include <util/atomic.h>
+#endif
 extern "C" {
         extern volatile time_t __system_time;
 

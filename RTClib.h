@@ -5,8 +5,15 @@
 
 #ifndef RTCLIB_H
 #define RTCLIB_H
+
+// TO-DO: Still allow (and prefer) DS chip.
+#if !defined(__arm__) || defined(ARDUINO_SAM_DUE)
+#define DS1307_ADDRESS 0x68
+#endif // ! __arm__
+
+
 #ifdef	__cplusplus
-#ifdef __AVR__
+#if defined(DS1307_ADDRESS)
 #include <Wire.h>
 #include <avr/pgmspace.h>
 #endif
@@ -30,7 +37,8 @@
 
 class DateTime {
 public:
-#ifdef __AVR__
+#if defined(__AVR__)
+        // Overload needed because we use 64bits, not 32.
         DateTime(time_t t = 0);
 #endif
         DateTime(int32_t t);
@@ -82,7 +90,7 @@ protected:
 };
 
 
-#ifndef __arm__
+#if defined(DS1307_ADDRESS)
 // RTC based on the DS1307 chip connected via I2C and the Wire library
 
 enum SqwPinMode {
@@ -125,14 +133,14 @@ protected:
 };
 
 extern RTC_DS1307 RTC_DS1307_RTC; // To-do: deprecate, and use a features function
-#else // __arm__
+#else //  defined(DS1307_ADDRESS)
 enum SqwPinMode {
         SquareWaveOFF   = 0,
         SquareWaveON    = 0x80,
         SquareWave1HZ   = 1,
         SquareWave32kHz = 2
 };
-#endif // __arm__
+#endif //  defined(DS1307_ADDRESS)
 
 extern void RTCset(const DateTime& dt);
 extern DateTime RTCnow();

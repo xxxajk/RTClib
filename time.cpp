@@ -33,8 +33,12 @@
         may be incremented at interrupt time.
  */
 #include "time.h"
-#include <inttypes.h>
+#if defined(ARDUINO_ARCH_SAM)
+#include "ARM_ATOMIC.h"
+#else
 #include <util/atomic.h>
+#endif
+#include <inttypes.h>
 #include <RTClib.h>
 
 

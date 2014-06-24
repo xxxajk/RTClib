@@ -3,11 +3,6 @@
 
 #include <RTClib.h>
 
-// TO-DO: Still allow (and prefer) DS chip.
-#if !defined(__arm__)
-#define DS1307_ADDRESS 0x68
-#endif // ! __arm__
-
 ////////////////////////////////////////////////////////////////////////////////
 // DateTime implementation - ignores time zones and DST changes
 // NOTE: also ignores leap seconds, see http://en.wikipedia.org/wiki/Leap_second
@@ -121,7 +116,7 @@ DateTime::DateTime(const char* date, const char* time) {
  */
 
 time_t DateTime::FatPacked(void) const {
-#if defined(__arm__)
+#if !defined(DS1307_ADDRESS)
         DateTime x = DateTime(this->secondstime());
         return fatfs_time(&x._time);
 #else
@@ -135,7 +130,7 @@ time_t DateTime::FatPacked(void) const {
  */
 
 time_t DateTime::unixtime(void) const {
-#if defined(__arm__)
+#if !defined(DS1307_ADDRESS)
         return mk_gmtime(&_time);
 #else
         return (mk_gmtime(&_time) + UNIX_OFFSET);
@@ -147,7 +142,7 @@ time_t DateTime::unixtime(void) const {
  * @return Time in seconds since 1/1/1900
  */
 time_t DateTime::secondstime(void) const {
-#if defined(__arm__)
+#if !defined(DS1307_ADDRESS)
         return (mk_gmtime(&_time) + UNIX_OFFSET);
 #else
         return mk_gmtime(&_time);
@@ -169,7 +164,7 @@ static uint8_t decToBcd(uint8_t val) {
         return ( (val / 10 * 16) + (val % 10));
 }
 
-#if !defined(__arm__)
+#if defined(DS1307_ADDRESS)
 
 uint8_t RTC_DS1307::begin(const DateTime& dt) {
         XMEM_ACQUIRE_I2C();
@@ -332,10 +327,10 @@ uint8_t RTC_Millis::isrunning(void) {
 RTC_DS1307 RTC_DS1307_RTC;
 RTC_Millis RTC_ARDUINO_MILLIS_RTC;
 static boolean WireStarted = false;
-#endif // ! __arm__
+#endif // defined(DS1307_ADDRESS)
 
 void RTCstart(void) {
-#if !defined(__arm__)
+#if !defined(DS1307_ADDRESS)
         if(!WireStarted) {
                 WireStarted = true;
                 RTC_ARDUINO_MILLIS_RTC.begin(DateTime(__DATE__, __TIME__));
@@ -398,7 +393,8 @@ uint8_t RTCreadMemory(uint8_t offset, uint8_t* data, uint8_t length) {
 #if defined(__arm__) && defined(CORE_TEENSY)
         return 0;
 #else
-        if(RTChardware()) return RTC_DS1307_RTC.readMemory(offset, data, length);
+        if(RTChardware())
+                return RTC_DS1307_RTC.readMemory(offset, data, length);
         else
                 return 0;
 #endif
@@ -408,7 +404,8 @@ uint8_t RTCwriteMemory(uint8_t offset, uint8_t* data, uint8_t length) {
 #if defined(__arm__) && defined(CORE_TEENSY)
         return 0;
 #else
-        if(RTChardware()) return RTC_DS1307_RTC.writeMemory(offset, data, length);
+        if(RTChardware())
+                return RTC_DS1307_RTC.writeMemory(offset, data, length);
         else
                 return 0;
 
