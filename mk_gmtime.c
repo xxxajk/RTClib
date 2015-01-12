@@ -36,6 +36,8 @@
 
 #include "time.h"
 
+extern unsigned char is_leap_year(int year);
+
 time_t
 mk_gmtime(const struct tm * timeptr)
 {

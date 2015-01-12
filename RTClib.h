@@ -6,8 +6,19 @@
 #ifndef RTCLIB_H
 #define RTCLIB_H
 
+#include <Arduino.h>
+#include "time.h"
+#ifdef	__cplusplus
+extern "C" {
+#endif
+        extern void RTC_systime(void);
+#ifdef	__cplusplus
+}
+#endif
+
+
 // TO-DO: Still allow (and prefer) DS chip.
-#if !defined(__arm__) || defined(ARDUINO_SAM_DUE)
+#if !defined(__arm__) || defined(ARDUINO_SAM_DUE) || defined(ARDUINO_SAMD_ZERO)
 #define DS1307_ADDRESS 0x68
 #endif // ! __arm__
 
@@ -17,20 +28,13 @@
 #include <Wire.h>
 #include <avr/pgmspace.h>
 #endif
-#include <Arduino.h>
-#include "time.h"
 #define WIREWRITE Wire.write
 #define WIREREAD Wire.read
 
-/* Set this to a one to use the xmem2 lock. This is needed for multitasking and threading */
-#ifndef USE_XMEM_I2C_LOCK
-#define USE_XMEM_I2C_LOCK 0
-#endif
-
-#if USE_XMEM_I2C_LOCK
-#include <xmem.h>
-#else
+#ifndef XMEM_ACQUIRE_I2C
 #define XMEM_ACQUIRE_I2C() (void(0))
+#endif
+#ifndef XMEM_RELEASE_I2C
 #define XMEM_RELEASE_I2C() (void(0))
 #endif
 
@@ -47,43 +51,16 @@ public:
         DateTime(const char* date, const char* time);
         DateTime(uint16_t fdate, uint16_t ftime);
 
-        uint16_t year(void) const {
-
-#ifdef __arm__
-                // arm uses a different epoch
-                return _time.tm_year + 1930;
-#else
-                return _time.tm_year + 1900;
-#endif
-        }
-
-        uint8_t month(void) const {
-                return _time.tm_mon;
-        }
-
-        uint8_t day(void) const {
-                return _time.tm_mday;
-        }
-
-        uint8_t hour(void) const {
-                return _time.tm_hour;
-        }
-
-        uint8_t minute(void) const {
-                return _time.tm_min;
-        }
-
-        uint8_t second(void) const {
-                return _time.tm_sec;
-        }
-
-        uint8_t dayOfWeek(void) const {
-                return _time.tm_wday;
-        }
-
-        time_t secondstime(void) const;
-        time_t unixtime(void) const;
-        time_t FatPacked(void) const;
+        uint16_t year(void);
+        uint8_t month(void);
+        uint8_t day(void);
+        uint8_t hour(void);
+        uint8_t minute(void);
+        uint8_t second(void);
+        uint8_t dayOfWeek(void);
+        time_t secondstime(void);
+        time_t unixtime(void);
+        time_t FatPacked(void);
 
 protected:
         struct tm _time; // since 1/1/1900
@@ -105,7 +82,7 @@ enum SqwPinMode {
 class RTC_DS1307 {
 public:
         static uint8_t begin(const DateTime& dt);
-        static uint8_t adjust(const DateTime& dt);
+        static uint8_t adjust(DateTime& dt);
         static uint8_t set(int shour, int smin, int ssec, int sday, int smonth, int syear);
         uint8_t isrunning(void);
         static DateTime now();
@@ -121,10 +98,8 @@ public:
 class RTC_Millis {
 public:
 
-        static uint8_t begin(const DateTime& dt) {
-                return(adjust(dt));
-        }
-        static uint8_t adjust(const DateTime& dt);
+        static uint8_t begin(DateTime& dt);
+        static uint8_t adjust(DateTime& dt);
         static DateTime now();
         uint8_t isrunning(void);
 
@@ -140,22 +115,28 @@ enum SqwPinMode {
         SquareWave1HZ   = 1,
         SquareWave32kHz = 2
 };
+// !defined(ARDUINO)
 #endif //  defined(DS1307_ADDRESS)
 
 extern void RTCset(const DateTime& dt);
 extern DateTime RTCnow();
-boolean RTChardware(void);
+bool RTChardware(void);
 uint8_t RTCreadMemory(uint8_t offset, uint8_t* data, uint8_t length);
 uint8_t RTCwriteMemory(uint8_t offset, uint8_t* data, uint8_t length);
 SqwPinMode RTCreadSqwPinMode();
 void RTCwriteSqwPinMode(SqwPinMode mode);
 
-
-extern "C" {
 #endif
-        extern void RTC_systime(void);
-#ifdef	__cplusplus
-}
+
+#if defined(LOAD_RTCLIB)
+
+/* sketch-only hack */
+#ifdef __cplusplus
+#if defined(ARDUINO) && !defined(RTC_LOADED)
+#define RTCLIB_INCLUDER
+#include "RTClib.cpp"
+#endif
+#endif
 #endif
 
 #endif // RTCLIB_H

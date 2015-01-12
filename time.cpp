@@ -32,8 +32,11 @@
         Standard time() function. Copying from __system_time must be atomic, since it
         may be incremented at interrupt time.
  */
+
+#define RTC_LOADED
+
 #include "time.h"
-#if defined(ARDUINO_ARCH_SAM)
+#if defined(ARDUINO_SAM_DUE) || defined(ARDUINO_SAMD_ZERO)
 #include "ARM_ATOMIC.h"
 #else
 #include <util/atomic.h>

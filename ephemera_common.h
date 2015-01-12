@@ -36,7 +36,9 @@
 #define INCLINATION 0.409105176667471    /* Earths axial tilt at the epoch */
 #define PERIHELION 31316400L    /* perihelion of 1999, 03 jan 13:00 UTC */
 #define SOLSTICE 836160L        /* winter solstice of 1999, 22 Dec 07:44 UTC */
+#ifndef TWO_PI
 #define TWO_PI 6.283185307179586
+#endif
 #define TROP_CYCLE 5022440.6025
 #define ANOM_CYCLE 5022680.6082
 #define DELTA_V 0.03342044    /* 2x orbital eccentricity */

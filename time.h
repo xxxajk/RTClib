@@ -98,21 +98,15 @@
 
 #ifndef TIME_H
 #define TIME_H
-#ifdef __cplusplus
+#ifndef __cplusplus
+#define RTC_LOADED
 
-extern "C" {
-#else
 #include "RTClib.h"
 #endif
 
 
 #include <inttypes.h>
 #include <stdlib.h>
-#ifdef __cplusplus
-}
-#endif
-
-
 
 #if defined(__AVR__)
 

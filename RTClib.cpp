@@ -1,8 +1,12 @@
 // Code by JeeLabs http://news.jeelabs.org/code/
 // Released to the public domain! Enjoy!
 
+#ifndef ARDUINO
+#define RTCLIB_INCLUDER
 #include <RTClib.h>
+#endif
 
+#ifdef RTCLIB_INCLUDER
 ////////////////////////////////////////////////////////////////////////////////
 // DateTime implementation - ignores time zones and DST changes
 // NOTE: also ignores leap seconds, see http://en.wikipedia.org/wiki/Leap_second
@@ -14,6 +18,40 @@ DateTime::DateTime(time_t t) {
         gmtime_r((const time_t *)&t, &_time);
 }
 #endif
+
+uint16_t DateTime::year(void) {
+
+#ifdef __arm__
+        // arm uses a different epoch
+        return _time.tm_year + 1930;
+#else
+        return _time.tm_year + 1900;
+#endif
+}
+
+uint8_t DateTime::month(void) {
+        return _time.tm_mon;
+}
+
+uint8_t DateTime::day(void) {
+        return _time.tm_mday;
+}
+
+uint8_t DateTime::hour(void) {
+        return _time.tm_hour;
+}
+
+uint8_t DateTime::minute(void) {
+        return _time.tm_min;
+}
+
+uint8_t DateTime::second(void) {
+        return _time.tm_sec;
+}
+
+uint8_t DateTime::dayOfWeek(void) {
+        return _time.tm_wday;
+}
 
 // 32bit time_t -> struct tm
 
@@ -81,7 +119,7 @@ DateTime::DateTime(const char* date, const char* time) {
         uint8_t m = 0;
         _time.tm_year = ((conv2d(date + 7)*100) + conv2d(date + 9)) - 1900;
         switch(date[0]) {
-                case 'J': m = date[1] == 'a' ? 1: m = date[2] == 'n' ? 6: 7;
+                case 'J': m = date[1] == 'a' ? 1: (date[2] == 'n' ? 6: 7);
                         break;
                 case 'F': m = 2;
                         break;
@@ -115,7 +153,7 @@ DateTime::DateTime(const char* date, const char* time) {
  * Does not work after the year 2107.
  */
 
-time_t DateTime::FatPacked(void) const {
+time_t DateTime::FatPacked(void) {
 #if !defined(DS1307_ADDRESS)
         DateTime x = DateTime(this->secondstime());
         return fatfs_time(&x._time);
@@ -129,7 +167,7 @@ time_t DateTime::FatPacked(void) const {
  * @return Time in seconds since 1/1/1970
  */
 
-time_t DateTime::unixtime(void) const {
+time_t DateTime::unixtime(void) {
 #if !defined(DS1307_ADDRESS)
         return mk_gmtime(&_time);
 #else
@@ -141,7 +179,7 @@ time_t DateTime::unixtime(void) const {
  *
  * @return Time in seconds since 1/1/1900
  */
-time_t DateTime::secondstime(void) const {
+time_t DateTime::secondstime(void) {
 #if !defined(DS1307_ADDRESS)
         return (mk_gmtime(&_time) + UNIX_OFFSET);
 #else
@@ -151,6 +189,8 @@ time_t DateTime::secondstime(void) const {
 
 ////////////////////////////////////////////////////////////////////////////////
 // RTC_DS1307 implementation
+
+#if defined(DS1307_ADDRESS)
 
 static uint8_t bcd2bin(uint8_t val) {
         return val - 6 * (val >> 4);
@@ -164,7 +204,6 @@ static uint8_t decToBcd(uint8_t val) {
         return ( (val / 10 * 16) + (val % 10));
 }
 
-#if defined(DS1307_ADDRESS)
 
 uint8_t RTC_DS1307::begin(const DateTime& dt) {
         XMEM_ACQUIRE_I2C();
@@ -189,7 +228,7 @@ uint8_t RTC_DS1307::isrunning(void) {
         return ss;
 }
 
-uint8_t RTC_DS1307::adjust(const DateTime& dt) {
+uint8_t RTC_DS1307::adjust(DateTime& dt) {
         XMEM_ACQUIRE_I2C();
         Wire.beginTransmission(DS1307_ADDRESS);
         WIREWRITE((uint8_t)0);
@@ -304,7 +343,11 @@ void RTC_DS1307::writeSqwPinMode(SqwPinMode mode) {
 
 int64_t RTC_Millis::offset = 0;
 
-uint8_t RTC_Millis::adjust(const DateTime& dt) {
+uint8_t RTC_Millis::begin(DateTime& dt) {
+                return(adjust(dt));
+        }
+
+uint8_t RTC_Millis::adjust(DateTime& dt) {
         XMEM_ACQUIRE_I2C(); // Yes, this is not I2C, but we should make this safe
         offset = dt.secondstime() - millis() / 1000;
         XMEM_RELEASE_I2C();
@@ -326,23 +369,24 @@ uint8_t RTC_Millis::isrunning(void) {
 ////////////////////////////////////////////////////////////////////////////////
 RTC_DS1307 RTC_DS1307_RTC;
 RTC_Millis RTC_ARDUINO_MILLIS_RTC;
-static boolean WireStarted = false;
+static bool WireStarted = false;
 #endif // defined(DS1307_ADDRESS)
 
 void RTCstart(void) {
-#if !defined(DS1307_ADDRESS)
+#if defined(DS1307_ADDRESS)
         if(!WireStarted) {
                 WireStarted = true;
-                RTC_ARDUINO_MILLIS_RTC.begin(DateTime(__DATE__, __TIME__));
+                DateTime x = DateTime(__DATE__, __TIME__);
+                RTC_ARDUINO_MILLIS_RTC.begin(x);
                 Wire.begin();
                 if(!RTC_DS1307_RTC.isrunning())
-                        RTC_DS1307_RTC.adjust(DateTime(__DATE__, __TIME__));
+                        RTC_DS1307_RTC.adjust(x);
                 // Add more RTC as needed.
         }
 #endif
 }
 
-void RTCset(const DateTime& dt) {
+void RTCset(DateTime& dt) {
 #if defined(__arm__) && defined(CORE_TEENSY)
         rtc_set(dt.unixtime());
 #else
@@ -366,7 +410,7 @@ DateTime RTCnow(void) {
 #endif
 }
 
-boolean RTChardware(void) {
+bool RTChardware(void) {
 #if defined(__arm__) && defined(CORE_TEENSY)
         return true;
 #else
@@ -377,7 +421,7 @@ boolean RTChardware(void) {
 #endif
 }
 
-boolean RTChasRAM(void) {
+bool RTChasRAM(void) {
 #if defined(__arm__) && defined(CORE_TEENSY)
         return false;
 #else
@@ -467,3 +511,8 @@ extern "C" {
                 set_system_time(RTCnow().unixtime());
         }
 }
+#endif
+
+#ifndef RTC_LOADED
+#define RTC_LOADED
+#endif
