@@ -36,11 +36,7 @@
 #define RTC_LOADED
 
 #include "time.h"
-#if defined(ARDUINO_SAM_DUE) || defined(ARDUINO_SAMD_ZERO)
-#include "ARM_ATOMIC.h"
-#else
-#include <util/atomic.h>
-#endif
+#include "ATOMIC.h"
 #include <inttypes.h>
 #include <RTClib.h>
 

@@ -458,6 +458,15 @@ void set_system_time(time_t timestamp);
 #ifdef __cplusplus
 }
 #endif
+#elif defined(__PIC32__)
+#include <../../pic32mx/include/time.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+void set_system_time(time_t timestamp);
+#ifdef __cplusplus
+}
+#endif
 #else
 #error "I do not know your CPU type. Please send a bug report to <xxxajk@gmail.com>"
 #endif

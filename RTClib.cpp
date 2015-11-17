@@ -205,7 +205,7 @@ static uint8_t decToBcd(uint8_t val) {
 }
 
 
-uint8_t RTC_DS1307::begin(const DateTime& dt) {
+uint8_t RTC_DS1307::begin(const DateTime& dt __attribute__((unused))) {
         XMEM_ACQUIRE_I2C();
         Wire.beginTransmission(DS1307_ADDRESS);
         uint8_t x = Wire.endTransmission();

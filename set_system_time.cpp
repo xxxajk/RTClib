@@ -38,11 +38,7 @@
 #define RTC_DO_NOT_ADD
 
 #include "time.h"
-#if defined(ARDUINO_SAM_DUE) || defined(ARDUINO_SAMD_ZERO)
-#include "ARM_ATOMIC.h"
-#else
-#include <util/atomic.h>
-#endif
+#include "ATOMIC.h"
 extern "C" {
         extern volatile time_t __system_time;
 
