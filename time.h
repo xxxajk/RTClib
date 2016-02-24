@@ -458,7 +458,7 @@ void set_system_time(time_t timestamp);
 #ifdef __cplusplus
 }
 #endif
-#elif defined(__PIC32__)
+#elif defined(ARDUINO_ARCH_PIC32)
 #include <../../pic32mx/include/time.h>
 #ifdef __cplusplus
 extern "C" {

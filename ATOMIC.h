@@ -6,7 +6,7 @@
 #ifndef _ALL_ATOMIC_
 
 #define _ALL_ATOMIC_
-#if defined(__PIC32__)
+#if defined(ARDUINO_ARCH_PIC32)
 #include <wiring.h>
 #include "PIC32_ATOMIC.h"
 #elif !defined(CORE_TEENSY) && defined(__arm__)
