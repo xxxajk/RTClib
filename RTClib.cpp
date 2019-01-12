@@ -87,7 +87,7 @@ DateTime::DateTime(uint16_t fdate, uint16_t ftime) {
          *       6 bit10:5 m
          *       5 bit4:0 s (2 second resolution)
          */
-#if defined(__arm__) && defined(CORE_TEENSY)
+#if defined(__arm__) && defined(CORE_TEENSY) && !defined(__IMXRT1052__) && !defined(__IMXRT1062__)
         // Messed up EPOCH
         _time.tm_year = ((fdate >> 9) & 0x7f) + 50;
 #else
@@ -337,10 +337,18 @@ void RTC_DS1307::writeSqwPinMode(SqwPinMode mode) {
         XMEM_RELEASE_I2C();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Add more RTC as needed.
+//
+////////////////////////////////////////////////////////////////////////////////
+RTC_DS1307 RTC_DS1307_RTC;
+static bool WireStarted = false;
+#endif // defined(DS1307_ADDRESS)
 
 ////////////////////////////////////////////////////////////////////////////////
 // RTC_Millis implementation
-
+static bool RTC_MillisStarted = false;
 int64_t RTC_Millis::offset = 0;
 
 uint8_t RTC_Millis::begin(DateTime& dt) {
@@ -361,23 +369,17 @@ DateTime RTC_Millis::now() {
 uint8_t RTC_Millis::isrunning(void) {
         return offset ? 0 : 1;
 }
-
-////////////////////////////////////////////////////////////////////////////////
-//
-// Add more RTC as needed.
-//
-////////////////////////////////////////////////////////////////////////////////
-RTC_DS1307 RTC_DS1307_RTC;
 RTC_Millis RTC_ARDUINO_MILLIS_RTC;
-static bool WireStarted = false;
-#endif // defined(DS1307_ADDRESS)
 
 void RTCstart(void) {
+        if(!RTC_MillisStarted) {
+                RTC_MillisStarted = true;
+                DateTime x = DateTime(__DATE__, __TIME__);
+                RTC_ARDUINO_MILLIS_RTC.begin(x);
+        }
 #if defined(DS1307_ADDRESS)
         if(!WireStarted) {
                 WireStarted = true;
-                DateTime x = DateTime(__DATE__, __TIME__);
-                RTC_ARDUINO_MILLIS_RTC.begin(x);
                 Wire.begin();
                 if(!RTC_DS1307_RTC.isrunning())
                         RTC_DS1307_RTC.adjust(x);
@@ -387,46 +389,54 @@ void RTCstart(void) {
 }
 
 void RTCset(DateTime& dt) {
-#if defined(__arm__) && defined(CORE_TEENSY)
+#if defined(__arm__) && defined(CORE_TEENSY) && !defined(__IMXRT1052__) && !defined(__IMXRT1062__)
         rtc_set(dt.unixtime());
 #else
         RTCstart(); // Automatic.
         RTC_ARDUINO_MILLIS_RTC.adjust(dt); // Always present.
+#if defined(DS1307_ADDRESS)
         if(RTC_DS1307_RTC.isrunning()) {
                 RTC_DS1307_RTC.adjust(dt);
         }
+#endif
         // Add more RTC as needed.
 #endif
 }
 
 DateTime RTCnow(void) {
-#if defined(__arm__) && defined(CORE_TEENSY)
+#if defined(__arm__) && defined(CORE_TEENSY) && !defined(__IMXRT1052__) && !defined(__IMXRT1062__)
         return DateTime(rtc_get());
 #else
         RTCstart(); // Automatic.
+#if defined(DS1307_ADDRESS)
         if(RTC_DS1307_RTC.isrunning()) return RTC_DS1307_RTC.now();
+#endif
         // Add more RTC as needed.
         return RTC_ARDUINO_MILLIS_RTC.now();
 #endif
 }
 
 bool RTChardware(void) {
-#if defined(__arm__) && defined(CORE_TEENSY)
+#if defined(__arm__) && defined(CORE_TEENSY) && !defined(__IMXRT1052__) && !defined(__IMXRT1062__)
         return true;
 #else
         RTCstart(); // Automatic.
+#if defined(DS1307_ADDRESS)
         if(RTC_DS1307_RTC.isrunning()) return true;
+#endif
         // Add more RTC as needed.
         return false;
 #endif
 }
 
 bool RTChasRAM(void) {
-#if defined(__arm__) && defined(CORE_TEENSY)
+#if defined(__arm__) && defined(CORE_TEENSY) && !defined(__IMXRT1052__) && !defined(__IMXRT1062__)
         return false;
 #else
         RTCstart(); // Automatic.
+#if defined(DS1307_ADDRESS)
         if(RTC_DS1307_RTC.isrunning()) return true;
+#endif
         // Add more RTC as needed.
         return false;
 #endif
@@ -434,30 +444,34 @@ bool RTChasRAM(void) {
 }
 
 uint8_t RTCreadMemory(uint8_t offset, uint8_t* data, uint8_t length) {
-#if defined(__arm__) && defined(CORE_TEENSY)
+#if defined(__arm__) && defined(CORE_TEENSY) && !defined(__IMXRT1052__) && !defined(__IMXRT1062__)
         return 0;
 #else
+#if defined(DS1307_ADDRESS)
         if(RTChardware())
                 return RTC_DS1307_RTC.readMemory(offset, data, length);
         else
-                return 0;
 #endif
+#endif
+                return 0;
 }
 
 uint8_t RTCwriteMemory(uint8_t offset, uint8_t* data, uint8_t length) {
-#if defined(__arm__) && defined(CORE_TEENSY)
+#if defined(__arm__) && defined(CORE_TEENSY) && !defined(__IMXRT1052__) && !defined(__IMXRT1062__)
         return 0;
 #else
+#if defined(DS1307_ADDRESS)
         if(RTChardware())
                 return RTC_DS1307_RTC.writeMemory(offset, data, length);
         else
+#endif
                 return 0;
 
 #endif
 }
 
 SqwPinMode RTCreadSqwPinMode() {
-#if defined(__arm__) && defined(CORE_TEENSY)
+#if defined(__arm__) && defined(CORE_TEENSY) && !defined(__IMXRT1052__) && !defined(__IMXRT1062__)
         if((*portConfigRegister(31) & 0x00000700UL) == 0x00000700UL) {
                 if(SIM_SOPT2 & SIM_SOPT2_RTCCLKOUTSEL) return SquareWave32kHz;
                 return SquareWave1HZ;
@@ -465,15 +479,17 @@ SqwPinMode RTCreadSqwPinMode() {
                 if(digitalRead(31)) return SquareWaveON;
         }
 #else
+#if defined(DS1307_ADDRESS)
         if(RTChardware()) return RTC_DS1307_RTC.readSqwPinMode();
         else
+#endif
 #endif
                 return SquareWaveOFF;
 
 }
 
 void RTCwriteSqwPinMode(SqwPinMode mode) {
-#if defined(__arm__) && defined(CORE_TEENSY)
+#if defined(__arm__) && defined(CORE_TEENSY) && !defined(__IMXRT1052__) && !defined(__IMXRT1062__)
 
         switch(mode) {
                 case SquareWaveOFF:
@@ -500,7 +516,9 @@ void RTCwriteSqwPinMode(SqwPinMode mode) {
                         break;
         }
 #else
+#if defined(DS1307_ADDRESS)
         if(RTChardware()) RTC_DS1307_RTC.writeSqwPinMode(mode);
+#endif
 #endif
 }
 

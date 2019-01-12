@@ -66,6 +66,18 @@ protected:
         struct tm _time; // since 1/1/1900
 };
 
+class RTC_Millis {
+public:
+
+        static uint8_t begin(DateTime& dt);
+        static uint8_t adjust(DateTime& dt);
+        static DateTime now();
+        uint8_t isrunning(void);
+
+protected:
+        static int64_t offset;
+};
+
 
 #if defined(DS1307_ADDRESS)
 // RTC based on the DS1307 chip connected via I2C and the Wire library
@@ -94,18 +106,6 @@ public:
 
 // RTC using the internal millis() clock, has to be initialized before use
 // NOTE: this clock won't be correct once the millis() timer rolls over (>49d?)
-
-class RTC_Millis {
-public:
-
-        static uint8_t begin(DateTime& dt);
-        static uint8_t adjust(DateTime& dt);
-        static DateTime now();
-        uint8_t isrunning(void);
-
-protected:
-        static int64_t offset;
-};
 
 extern RTC_DS1307 RTC_DS1307_RTC; // To-do: deprecate, and use a features function
 #else //  defined(DS1307_ADDRESS)
