@@ -372,9 +372,9 @@ uint8_t RTC_Millis::isrunning(void) {
 RTC_Millis RTC_ARDUINO_MILLIS_RTC;
 
 void RTCstart(void) {
+        DateTime x = DateTime(__DATE__, __TIME__);
         if(!RTC_MillisStarted) {
                 RTC_MillisStarted = true;
-                DateTime x = DateTime(__DATE__, __TIME__);
                 RTC_ARDUINO_MILLIS_RTC.begin(x);
         }
 #if defined(DS1307_ADDRESS)
