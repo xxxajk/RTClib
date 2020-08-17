@@ -46,7 +46,7 @@ extern "C" {
 
         time_t
         time(time_t * timer) {
-                time_t ret;
+                time_t ret=0;
                 RTC_systime(); /* Patch in to set current time here. */
 
                 ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
