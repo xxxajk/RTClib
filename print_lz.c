@@ -29,7 +29,7 @@
 
 /* $Id$ */
 
-/* print 2 digit integer with leading zero: auxillary function for isotime and asctime */
+/* print 2 digit integer with leading zero: auxiliary function for isotime and asctime */
 
 #include <stdlib.h>
 
