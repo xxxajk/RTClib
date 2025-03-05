@@ -1,5 +1,13 @@
 // Date and time functions using a DS1307 RTC connected via I2C and Wire lib
 
+#include <Arduino.h>
+#ifdef true
+#undef true
+#endif
+#ifdef false
+#undef false
+#endif
+#define LOAD_RTCLIB 1
 
 #include <Wire.h> // Needed for arduino IDE
 #include <RTClib.h>

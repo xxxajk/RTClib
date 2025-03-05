@@ -21,7 +21,7 @@ DateTime::DateTime(time_t t) {
 
 uint16_t DateTime::year(void) {
 
-#ifdef __arm__
+#if defined(__arm__) && defined(CORE_TEENSY) && !defined(__IMXRT1052__) && !defined(__IMXRT1062__)
         // arm uses a different epoch
         return _time.tm_year + 1930;
 #else
